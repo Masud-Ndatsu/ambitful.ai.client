@@ -31,7 +31,7 @@ const Navbar = () => {
               <a href="#home" className="text-foreground hover:text-primary transition-smooth">
                 Home
               </a>
-              <a href="#opportunities" className="text-foreground hover:text-primary transition-smooth">
+              <a href="/opportunities" className="text-foreground hover:text-primary transition-smooth">
                 Opportunities
               </a>
               <a href="#categories" className="text-foreground hover:text-primary transition-smooth">
@@ -76,7 +76,7 @@ const Navbar = () => {
               <a href="#home" className="block px-3 py-2 text-foreground hover:text-primary transition-smooth">
                 Home
               </a>
-              <a href="#opportunities" className="block px-3 py-2 text-foreground hover:text-primary transition-smooth">
+              <a href="/opportunities" className="block px-3 py-2 text-foreground hover:text-primary transition-smooth">
                 Opportunities
               </a>
               <a href="#categories" className="block px-3 py-2 text-foreground hover:text-primary transition-smooth">
