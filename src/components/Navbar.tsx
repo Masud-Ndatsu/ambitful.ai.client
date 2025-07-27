@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Menu, X } from "lucide-react";
+import { MessageCircle, Menu, X, User } from "lucide-react";
 import { useState } from "react";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // This would come from auth context in real app
 
   const scrollToChat = () => {
     const chatWidget = document.getElementById('chat-widget');
@@ -46,15 +49,59 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden md:block">
-            <Button 
-              onClick={scrollToChat}
-              className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
-            >
-              <MessageCircle className="mr-2 h-4 w-4" />
-              Get Career Advice
-            </Button>
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
+            {isLoggedIn ? (
+              <div className="flex items-center space-x-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={scrollToChat}
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Get Career Advice
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center space-x-2"
+                >
+                  <User className="h-4 w-4" />
+                  <span>Profile</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsLoggedIn(false)}
+                >
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={scrollToChat}
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Get Career Advice
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsAuthModalOpen(true)}
+                >
+                  Sign In
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setIsAuthModalOpen(true)}
+                >
+                  Sign Up
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -88,19 +135,68 @@ const Navbar = () => {
               <a href="#contact" className="block px-3 py-2 text-foreground hover:text-primary transition-smooth">
                 Contact
               </a>
-              <div className="px-3 py-2">
-                <Button 
-                  onClick={scrollToChat}
-                  className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
-                >
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Get Career Advice
-                </Button>
+              
+              <div className="pt-4 pb-3 border-t border-border">
+                {isLoggedIn ? (
+                  <div className="space-y-2">
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={scrollToChat}
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Get Career Advice
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full flex items-center justify-center space-x-2"
+                    >
+                      <User className="h-4 w-4" />
+                      <span>Profile</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setIsLoggedIn(false)}
+                    >
+                      Sign Out
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={scrollToChat}
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Get Career Advice
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setIsAuthModalOpen(true)}
+                    >
+                      Sign In
+                    </Button>
+                    <Button
+                      className="w-full"
+                      onClick={() => setIsAuthModalOpen(true)}
+                    >
+                      Sign Up
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         )}
       </div>
+
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
     </nav>
   );
 };
