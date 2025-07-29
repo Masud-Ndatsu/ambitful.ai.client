@@ -2,7 +2,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, ExternalLink } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 interface Opportunity {
   id: string;
@@ -37,11 +36,6 @@ const getTypeColor = (type: string) => {
 };
 
 export const OpportunityCard = ({ opportunity, viewMode, onViewDetails }: OpportunityCardProps) => {
-  const navigate = useNavigate();
-  
-  const handleViewDetails = () => {
-    navigate(`/opportunities/${opportunity.id}`);
-  };
   if (viewMode === "list") {
     return (
       <Card className="bg-gradient-card border-0 shadow-soft hover:shadow-glow transition-all duration-300">
@@ -81,7 +75,7 @@ export const OpportunityCard = ({ opportunity, viewMode, onViewDetails }: Opport
           </div>
           
           <div className="ml-6 flex flex-col gap-2">
-            <Button onClick={handleViewDetails}>
+            <Button onClick={onViewDetails}>
               View Details
             </Button>
             <Button 
@@ -136,7 +130,7 @@ export const OpportunityCard = ({ opportunity, viewMode, onViewDetails }: Opport
       <CardFooter className="pt-3 flex flex-col gap-2">
         <Button 
           className="w-full"
-          onClick={handleViewDetails}
+          onClick={onViewDetails}
         >
           View Details
         </Button>
