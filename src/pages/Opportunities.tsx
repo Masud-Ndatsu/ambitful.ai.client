@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { OpportunitySearch } from "@/components/OpportunitySearch";
@@ -111,6 +112,7 @@ const mockOpportunities: Opportunity[] = [
 ];
 
 const Opportunities = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     categories: [] as string[],
@@ -120,9 +122,32 @@ const Opportunities = () => {
     sortBy: "newest"
   });
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
+
+  // Get the selected opportunity from URL parameter
+  const selectedOpportunityId = searchParams.get('opportunity');
+  const selectedOpportunity = selectedOpportunityId 
+    ? mockOpportunities.find(opp => opp.id === selectedOpportunityId) 
+    : null;
+
+  // Function to handle opening opportunity modal
+  const handleViewDetails = (opportunityId: string) => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set('opportunity', opportunityId);
+      return newParams;
+    });
+  };
+
+  // Function to handle closing opportunity modal
+  const handleCloseModal = () => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      newParams.delete('opportunity');
+      return newParams;
+    });
+  };
 
   const filteredOpportunities = mockOpportunities.filter(opportunity => {
     const matchesSearch = opportunity.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -212,7 +237,7 @@ const Opportunities = () => {
                       key={opportunity.id}
                       opportunity={opportunity}
                       viewMode={viewMode}
-                      onViewDetails={() => setSelectedOpportunity(opportunity)}
+                      onViewDetails={() => handleViewDetails(opportunity.id)}
                     />
                   ))}
                 </div>
@@ -261,7 +286,7 @@ const Opportunities = () => {
       {selectedOpportunity && (
         <OpportunityDetailModal
           opportunity={selectedOpportunity}
-          onClose={() => setSelectedOpportunity(null)}
+          onClose={handleCloseModal}
         />
       )}
     </div>
