@@ -9,9 +9,9 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // This would come from auth context in real app
 
   const scrollToChat = () => {
-    const chatWidget = document.getElementById('chat-widget');
+    const chatWidget = document.getElementById("chat-widget");
     if (chatWidget) {
-      chatWidget.scrollIntoView({ behavior: 'smooth' });
+      chatWidget.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -31,19 +31,34 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <a href="#home" className="text-foreground hover:text-primary transition-smooth">
+              <a
+                href="#home"
+                className="text-foreground hover:text-primary transition-smooth"
+              >
                 Home
               </a>
-              <a href="/opportunities" className="text-foreground hover:text-primary transition-smooth">
+              <a
+                href="/opportunities"
+                className="text-foreground hover:text-primary transition-smooth"
+              >
                 Opportunities
               </a>
-              <a href="#categories" className="text-foreground hover:text-primary transition-smooth">
+              <a
+                href="#categories"
+                className="text-foreground hover:text-primary transition-smooth"
+              >
                 Categories
               </a>
-              <a href="#about" className="text-foreground hover:text-primary transition-smooth">
+              <a
+                href="#about"
+                className="text-foreground hover:text-primary transition-smooth"
+              >
                 About
               </a>
-              <a href="#contact" className="text-foreground hover:text-primary transition-smooth">
+              <a
+                href="#contact"
+                className="text-foreground hover:text-primary transition-smooth"
+              >
                 Contact
               </a>
             </div>
@@ -53,11 +68,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={scrollToChat}
-                >
+                <Button variant="outline" size="sm" onClick={scrollToChat}>
                   <MessageCircle className="mr-2 h-4 w-4" />
                   Get Career Advice
                 </Button>
@@ -79,26 +90,16 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={scrollToChat}
-                >
+                <Button size="sm" onClick={scrollToChat}>
                   <MessageCircle className="mr-2 h-4 w-4" />
                   Get Career Advice
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={() => setIsAuthModalOpen(true)}
                 >
                   Sign In
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => setIsAuthModalOpen(true)}
-                >
-                  Sign Up
                 </Button>
               </div>
             )}
@@ -111,7 +112,11 @@ const Navbar = () => {
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </Button>
           </div>
         </div>
@@ -120,27 +125,42 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-background border-t">
-              <a href="#home" className="block px-3 py-2 text-foreground hover:text-primary transition-smooth">
+              <a
+                href="#home"
+                className="block px-3 py-2 text-foreground hover:text-primary transition-smooth"
+              >
                 Home
               </a>
-              <a href="/opportunities" className="block px-3 py-2 text-foreground hover:text-primary transition-smooth">
+              <a
+                href="/opportunities"
+                className="block px-3 py-2 text-foreground hover:text-primary transition-smooth"
+              >
                 Opportunities
               </a>
-              <a href="#categories" className="block px-3 py-2 text-foreground hover:text-primary transition-smooth">
+              <a
+                href="#categories"
+                className="block px-3 py-2 text-foreground hover:text-primary transition-smooth"
+              >
                 Categories
               </a>
-              <a href="#about" className="block px-3 py-2 text-foreground hover:text-primary transition-smooth">
+              <a
+                href="#about"
+                className="block px-3 py-2 text-foreground hover:text-primary transition-smooth"
+              >
                 About
               </a>
-              <a href="#contact" className="block px-3 py-2 text-foreground hover:text-primary transition-smooth">
+              <a
+                href="#contact"
+                className="block px-3 py-2 text-foreground hover:text-primary transition-smooth"
+              >
                 Contact
               </a>
-              
+
               <div className="pt-4 pb-3 border-t border-border">
                 {isLoggedIn ? (
                   <div className="space-y-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full"
                       onClick={scrollToChat}
                     >
@@ -164,26 +184,16 @@ const Navbar = () => {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={scrollToChat}
-                    >
+                    <Button className="w-full" onClick={scrollToChat}>
                       <MessageCircle className="mr-2 h-4 w-4" />
                       Get Career Advice
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       className="w-full"
                       onClick={() => setIsAuthModalOpen(true)}
                     >
                       Sign In
-                    </Button>
-                    <Button
-                      className="w-full"
-                      onClick={() => setIsAuthModalOpen(true)}
-                    >
-                      Sign Up
                     </Button>
                   </div>
                 )}
@@ -193,9 +203,9 @@ const Navbar = () => {
         )}
       </div>
 
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
       />
     </nav>
   );
