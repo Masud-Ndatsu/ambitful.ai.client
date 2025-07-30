@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // API Service Layer
 export interface ApiResponse<T> {
   data: T;
@@ -12,24 +13,24 @@ export interface ApiError {
 }
 
 class ApiService {
-  private baseURL = '/api';
+  private baseURL = "/api";
   private token: string | null = null;
 
   setAuthToken(token: string) {
     this.token = token;
-    localStorage.setItem('auth_token', token);
+    localStorage.setItem("auth_token", token);
   }
 
   getAuthToken(): string | null {
     if (!this.token) {
-      this.token = localStorage.getItem('auth_token');
+      this.token = localStorage.getItem("auth_token");
     }
     return this.token;
   }
 
   clearAuthToken() {
     this.token = null;
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem("auth_token");
   }
 
   private async request<T>(
@@ -41,7 +42,7 @@ class ApiService {
 
     const config: RequestInit = {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
       },
@@ -54,7 +55,7 @@ class ApiService {
 
       if (!response.ok) {
         throw {
-          message: data.message || 'Request failed',
+          message: data.message || "Request failed",
           status: response.status,
           code: data.code,
         } as ApiError;
@@ -78,13 +79,13 @@ class ApiService {
 
   // GET request
   async get<T>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { method: 'GET' });
+    return this.request<T>(endpoint, { method: "GET" });
   }
 
   // POST request
   async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
-      method: 'POST',
+      method: "POST",
       body: data ? JSON.stringify(data) : undefined,
     });
   }
@@ -92,14 +93,14 @@ class ApiService {
   // PUT request
   async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
-      method: 'PUT',
+      method: "PUT",
       body: data ? JSON.stringify(data) : undefined,
     });
   }
 
   // DELETE request
   async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+    return this.request<T>(endpoint, { method: "DELETE" });
   }
 }
 

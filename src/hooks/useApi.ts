@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
-import { ApiError } from '@/services/api';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, useCallback } from "react";
+import { ApiError } from "@/services/api";
 
 interface UseApiState<T> {
   data: T | null;
@@ -24,8 +25,8 @@ export function useApi<T>(
   });
 
   const execute = useCallback(async () => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    
+    setState((prev) => ({ ...prev, loading: true, error: null }));
+
     try {
       const result = await apiCall();
       setState({ data: result, loading: false, error: null });
@@ -64,19 +65,22 @@ export function useMutation<T, TVariables = void>(
     error: null,
   });
 
-  const mutate = useCallback(async (variables: TVariables) => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    
-    try {
-      const result = await mutationFn(variables);
-      setState({ data: result, loading: false, error: null });
-      return result;
-    } catch (error) {
-      const apiError = error as ApiError;
-      setState(prev => ({ ...prev, loading: false, error: apiError }));
-      throw error;
-    }
-  }, [mutationFn]);
+  const mutate = useCallback(
+    async (variables: TVariables) => {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+
+      try {
+        const result = await mutationFn(variables);
+        setState({ data: result, loading: false, error: null });
+        return result;
+      } catch (error) {
+        const apiError = error as ApiError;
+        setState((prev) => ({ ...prev, loading: false, error: apiError }));
+        throw error;
+      }
+    },
+    [mutationFn]
+  );
 
   const reset = useCallback(() => {
     setState({ data: null, loading: false, error: null });
