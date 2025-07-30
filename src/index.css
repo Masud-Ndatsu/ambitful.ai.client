@@ -38,9 +38,22 @@ All colors MUST be HSL.
 
     /* Custom design tokens */
     --primary-glow: 250 100% 82%;
-    --gradient-primary: linear-gradient(135deg, hsl(242 85% 58%), hsl(250 100% 82%));
-    --gradient-hero: linear-gradient(135deg, hsl(242 85% 58%) 0%, hsl(250 100% 82%) 50%, hsl(262 83% 58%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 14% 98%) 100%);
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(242 85% 58%),
+      hsl(250 100% 82%)
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(242 85% 58%) 0%,
+      hsl(250 100% 82%) 50%,
+      hsl(262 83% 58%) 100%
+    );
+    --gradient-card: linear-gradient(
+      145deg,
+      hsl(0 0% 100%) 0%,
+      hsl(220 14% 98%) 100%
+    );
     --shadow-soft: 0 4px 20px -2px hsl(220 14% 11% / 0.08);
     --shadow-glow: 0 8px 32px -8px hsl(242 85% 58% / 0.3);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -111,4 +124,58 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* .text-editor-container .ql-container {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.text-editor-container .ql-toolbar {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  border-bottom: none;
+}
+
+.text-editor-container .ql-editor {
+  min-height: 120px;
+} */
+
+/* TextEditor.css */
+.sticky-toolbar-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sticky-toolbar-editor .ql-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: white;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  border-bottom: 1px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sticky-toolbar-editor .ql-container {
+  flex: 1;
+  overflow-y: auto;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+
+.sticky-toolbar-editor .ql-editor {
+  min-height: 120px;
+  padding: 12px 15px;
+  /* font-size: 1rem; */
+  line-height: 1.5;
+}
+
+/* Optional: Add subtle shadow when scrolling */
+.sticky-toolbar-editor .ql-toolbar.sticky-shadow {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }

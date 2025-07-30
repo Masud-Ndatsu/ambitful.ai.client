@@ -1,15 +1,36 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Edit, Trash2, Eye, Filter, Download } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import TextEditor from "../RichTextEditor";
 
 const opportunities = [
   {
@@ -20,7 +41,7 @@ const opportunities = [
     dateAdded: "2024-01-15",
     author: "Admin User",
     views: 1200,
-    applications: 45
+    applications: 45,
   },
   {
     id: 2,
@@ -30,7 +51,7 @@ const opportunities = [
     dateAdded: "2024-01-20",
     author: "Content Manager",
     views: 0,
-    applications: 0
+    applications: 0,
   },
   {
     id: 3,
@@ -40,7 +61,7 @@ const opportunities = [
     dateAdded: "2024-01-18",
     author: "Admin User",
     views: 890,
-    applications: 32
+    applications: 32,
   },
   {
     id: 4,
@@ -50,7 +71,7 @@ const opportunities = [
     dateAdded: "2024-01-10",
     author: "Editor",
     views: 2100,
-    applications: 78
+    applications: 78,
   },
   {
     id: 5,
@@ -60,8 +81,8 @@ const opportunities = [
     dateAdded: "2024-01-22",
     author: "Admin User",
     views: 1500,
-    applications: 120
-  }
+    applications: 120,
+  },
 ];
 
 export function OpportunityManagement() {
@@ -69,10 +90,11 @@ export function OpportunityManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [description, setDescription] = useState("");
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedItems(opportunities.map(opp => opp.id));
+      setSelectedItems(opportunities.map((opp) => opp.id));
     } else {
       setSelectedItems([]);
     }
@@ -82,23 +104,31 @@ export function OpportunityManagement() {
     if (checked) {
       setSelectedItems([...selectedItems, id]);
     } else {
-      setSelectedItems(selectedItems.filter(item => item !== id));
+      setSelectedItems(selectedItems.filter((item) => item !== id));
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Published": return "default";
-      case "Draft": return "secondary";
-      case "Archived": return "outline";
-      default: return "secondary";
+      case "Published":
+        return "default";
+      case "Draft":
+        return "secondary";
+      case "Archived":
+        return "outline";
+      default:
+        return "secondary";
     }
   };
 
-  const filteredOpportunities = opportunities.filter(opp => {
-    const matchesStatus = statusFilter === "all" || opp.status.toLowerCase() === statusFilter;
-    const matchesCategory = categoryFilter === "all" || opp.category.toLowerCase() === categoryFilter;
-    const matchesSearch = opp.title.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredOpportunities = opportunities.filter((opp) => {
+    const matchesStatus =
+      statusFilter === "all" || opp.status.toLowerCase() === statusFilter;
+    const matchesCategory =
+      categoryFilter === "all" || opp.category.toLowerCase() === categoryFilter;
+    const matchesSearch = opp.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
     return matchesStatus && matchesCategory && matchesSearch;
   });
 
@@ -107,7 +137,9 @@ export function OpportunityManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold">Opportunity Management</h2>
-          <p className="text-muted-foreground">Manage and track all opportunities</p>
+          <p className="text-muted-foreground">
+            Manage and track all opportunities
+          </p>
         </div>
         <Dialog>
           <DialogTrigger asChild>
@@ -119,7 +151,9 @@ export function OpportunityManagement() {
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Create New Opportunity</DialogTitle>
-              <DialogDescription>Add a new opportunity to the platform</DialogDescription>
+              <DialogDescription>
+                Add a new opportunity to the platform
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -144,7 +178,12 @@ export function OpportunityManagement() {
               </div>
               <div>
                 <Label htmlFor="description">Description</Label>
-                <Textarea id="description" placeholder="Enter opportunity description" rows={4} />
+                <TextEditor
+                  id="description"
+                  value={description}
+                  onChange={setDescription}
+                  placeholder="Enter opportunity description"
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -181,9 +220,9 @@ export function OpportunityManagement() {
           <div className="flex gap-4 items-end">
             <div className="flex-1">
               <Label htmlFor="search">Search</Label>
-              <Input 
+              <Input
                 id="search"
-                placeholder="Search opportunities..." 
+                placeholder="Search opportunities..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -233,9 +272,15 @@ export function OpportunityManagement() {
               <span className="text-sm text-muted-foreground">
                 {selectedItems.length} item(s) selected
               </span>
-              <Button variant="outline" size="sm">Bulk Publish</Button>
-              <Button variant="outline" size="sm">Bulk Archive</Button>
-              <Button variant="destructive" size="sm">Bulk Delete</Button>
+              <Button variant="outline" size="sm">
+                Bulk Publish
+              </Button>
+              <Button variant="outline" size="sm">
+                Bulk Archive
+              </Button>
+              <Button variant="destructive" size="sm">
+                Bulk Delete
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -251,7 +296,7 @@ export function OpportunityManagement() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">
-                  <Checkbox 
+                  <Checkbox
                     checked={selectedItems.length === opportunities.length}
                     onCheckedChange={handleSelectAll}
                   />
@@ -270,22 +315,30 @@ export function OpportunityManagement() {
               {filteredOpportunities.map((opportunity) => (
                 <TableRow key={opportunity.id}>
                   <TableCell>
-                    <Checkbox 
+                    <Checkbox
                       checked={selectedItems.includes(opportunity.id)}
-                      onCheckedChange={(checked) => handleSelectItem(opportunity.id, !!checked)}
+                      onCheckedChange={(checked) =>
+                        handleSelectItem(opportunity.id, !!checked)
+                      }
                     />
                   </TableCell>
-                  <TableCell className="font-medium">{opportunity.title}</TableCell>
+                  <TableCell className="font-medium">
+                    {opportunity.title}
+                  </TableCell>
                   <TableCell>{opportunity.category}</TableCell>
                   <TableCell>
-                    <Badge variant={getStatusColor(opportunity.status) as any}>
+                    <Badge variant={getStatusColor(opportunity.status)}>
                       {opportunity.status}
                     </Badge>
                   </TableCell>
                   <TableCell>{opportunity.dateAdded}</TableCell>
                   <TableCell>{opportunity.author}</TableCell>
-                  <TableCell className="text-right">{opportunity.views}</TableCell>
-                  <TableCell className="text-right">{opportunity.applications}</TableCell>
+                  <TableCell className="text-right">
+                    {opportunity.views}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {opportunity.applications}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button variant="ghost" size="sm">
@@ -294,7 +347,11 @@ export function OpportunityManagement() {
                       <Button variant="ghost" size="sm">
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-destructive">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
