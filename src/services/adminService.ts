@@ -18,22 +18,26 @@ import {
   AnalyticsDateRange,
   ExportAnalyticsRequest,
 } from "@/types";
+import {
+  AdminOpportunity,
+  AdminOpportunityFilters,
+  AdminOpportunitiesResponse,
+  CreateOpportunityData,
+  UpdateOpportunityData,
+  BulkActionData,
+  OpportunityAnalytics,
+} from "@/types/admin-opportunity";
 
 export class AdminService {
   // System Settings
   async getSystemSettings(): Promise<SystemSettings> {
-    const response = await apiService.get<SystemSettings>("/admin/settings");
-    return response.data;
+    return await apiService.get<SystemSettings>("/admin/settings");
   }
 
   async updateSystemSettings(
     settings: Partial<SystemSettings>
   ): Promise<SystemSettings> {
-    const response = await apiService.put<SystemSettings>(
-      "/admin/settings",
-      settings
-    );
-    return response.data;
+    return await apiService.put<SystemSettings>("/admin/settings", settings);
   }
 
   // Notifications
@@ -41,7 +45,7 @@ export class AdminService {
     const response = await apiService.get<AdminNotification[]>(
       "/admin/notifications"
     );
-    return response.data;
+    return response;
   }
 
   async markNotificationAsRead(
@@ -50,14 +54,14 @@ export class AdminService {
     const response = await apiService.put<{ message: string }>(
       `/admin/notifications/${notificationId}/read`
     );
-    return response.data;
+    return response;
   }
 
   async markAllNotificationsAsRead(): Promise<{ message: string }> {
     const response = await apiService.put<{ message: string }>(
       "/admin/notifications/mark-all-read"
     );
-    return response.data;
+    return response;
   }
 
   // User Management
@@ -88,7 +92,7 @@ export class AdminService {
       page: number;
       totalPages: number;
     }>(`/admin/users?${queryParams.toString()}`);
-    return response.data;
+    return response;
   }
 
   async updateUserRole(userId: string, role: string): Promise<AdminUser> {
@@ -96,7 +100,7 @@ export class AdminService {
       `/admin/users/${userId}/role`,
       { role }
     );
-    return response.data;
+    return response;
   }
 
   async updateUserStatus(
@@ -107,14 +111,14 @@ export class AdminService {
       `/admin/users/${userId}/status`,
       { status }
     );
-    return response.data;
+    return response;
   }
 
   async deleteUser(userId: string): Promise<{ message: string }> {
     const response = await apiService.delete<{ message: string }>(
       `/admin/users/${userId}`
     );
-    return response.data;
+    return response;
   }
 
   // Opportunity Management
@@ -142,7 +146,7 @@ export class AdminService {
         extractedData: Record<string, any>;
       }>;
     }>("/admin/opportunities/drafts");
-    return response.data;
+    return response;
   }
 
   async approveDraft(
@@ -152,7 +156,7 @@ export class AdminService {
       message: string;
       opportunityId: string;
     }>(`/admin/opportunities/drafts/${draftId}/approve`);
-    return response.data;
+    return response;
   }
 
   async rejectDraft(
@@ -163,14 +167,14 @@ export class AdminService {
       `/admin/opportunities/drafts/${draftId}/reject`,
       { reason }
     );
-    return response.data;
+    return response;
   }
 
   async regenerateDraft(draftId: string): Promise<{ message: string }> {
     const response = await apiService.post<{ message: string }>(
       `/admin/opportunities/drafts/${draftId}/regenerate`
     );
-    return response.data;
+    return response;
   }
 
   // Analytics
@@ -188,7 +192,7 @@ export class AdminService {
     const response = await apiService.get<AnalyticsData>(
       `/admin/analytics?${queryParams.toString()}`
     );
-    return response.data;
+    return response;
   }
 
   async exportAnalytics(dateRange: {
@@ -200,7 +204,7 @@ export class AdminService {
       "/admin/analytics/export",
       dateRange
     );
-    return response.data;
+    return response;
   }
 
   // Content Crawling
@@ -213,7 +217,7 @@ export class AdminService {
         sourceId,
       }
     );
-    return response.data;
+    return response;
   }
 
   async getCrawlStatus(jobId: string): Promise<{
@@ -230,7 +234,7 @@ export class AdminService {
       resultCount: number;
       errors?: string[];
     }>(`/admin/crawl/status/${jobId}`);
-    return response.data;
+    return response;
   }
 
   async addCrawlSource(
@@ -240,7 +244,7 @@ export class AdminService {
       "/admin/crawl/sources",
       source
     );
-    return response.data;
+    return response;
   }
 
   async updateCrawlSource(
@@ -251,14 +255,70 @@ export class AdminService {
       `/admin/crawl/sources/${sourceId}`,
       source
     );
-    return response.data;
+    return response;
   }
 
   async deleteCrawlSource(sourceId: string): Promise<{ message: string }> {
     const response = await apiService.delete<{ message: string }>(
       `/admin/crawl/sources/${sourceId}`
     );
-    return response.data;
+    return response;
+  }
+
+  // Opportunity Management
+  async getAdminOpportunities(
+    filters: AdminOpportunityFilters = {}
+  ): Promise<AdminOpportunitiesResponse> {
+    const queryParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value.toString());
+      }
+    });
+
+    return await apiService.get<AdminOpportunitiesResponse>(
+      `/admin/opportunities?${queryParams.toString()}`
+    );
+  }
+
+  async createOpportunity(
+    data: CreateOpportunityData
+  ): Promise<AdminOpportunity> {
+    return await apiService.post<AdminOpportunity>(
+      "/admin/opportunities",
+      data
+    );
+  }
+
+  async updateOpportunity(
+    id: string,
+    data: UpdateOpportunityData
+  ): Promise<AdminOpportunity> {
+    return await apiService.put<AdminOpportunity>(
+      `/admin/opportunities/${id}`,
+      data
+    );
+  }
+
+  async deleteOpportunity(id: string): Promise<{ message: string }> {
+    return await apiService.delete<{ message: string }>(
+      `/admin/opportunities/${id}`
+    );
+  }
+
+  async bulkActionOpportunities(
+    data: BulkActionData
+  ): Promise<{ message: string; affected: number }> {
+    return await apiService.post<{ message: string; affected: number }>(
+      "/admin/opportunities/bulk-action",
+      data
+    );
+  }
+
+  async getOpportunityAnalytics(id: string): Promise<OpportunityAnalytics> {
+    return await apiService.get<OpportunityAnalytics>(
+      `/admin/opportunities/${id}/analytics`
+    );
   }
 }
 

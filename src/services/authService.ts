@@ -3,7 +3,7 @@ import {
   LoginCredentials,
   RegisterData,
   User,
-  AuthResponse
+  AuthResponse,
 } from "../types/auth";
 
 export class AuthService {
@@ -12,8 +12,8 @@ export class AuthService {
       "/auth/login",
       credentials
     );
-    apiService.setAuthToken(response.data.token);
-    return response.data;
+    apiService.setAuthToken(response.token);
+    return response;
   }
 
   async register(userData: RegisterData): Promise<AuthResponse> {
@@ -21,8 +21,9 @@ export class AuthService {
       "/auth/register",
       userData
     );
-    apiService.setAuthToken(response.data.token);
-    return response.data;
+    console.log({ response });
+    apiService.setAuthToken(response.token);
+    return response;
   }
 
   async logout(): Promise<void> {
@@ -34,13 +35,14 @@ export class AuthService {
   }
 
   async getCurrentUser(): Promise<User> {
-    const response = await apiService.get<User>("/auth/me");
-    return response.data;
+    const response = await apiService.get<User>("/users/profile");
+    console.log({ response });
+    return response;
   }
 
   async updateProfile(profileData: Partial<User["profile"]>): Promise<User> {
     const response = await apiService.put<User>("/auth/profile", profileData);
-    return response.data;
+    return response;
   }
 
   async changePassword(

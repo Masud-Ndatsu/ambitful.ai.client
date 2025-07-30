@@ -7,6 +7,7 @@ export interface RegisterData {
   email: string;
   password: string;
   name: string;
+  country: string;
 }
 
 export interface User {

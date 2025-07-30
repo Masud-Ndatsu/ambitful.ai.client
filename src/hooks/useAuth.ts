@@ -72,11 +72,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast({
         title: "Welcome!",
         description: "Your account has been created successfully.",
+        variant: "default",
       });
     } catch (error) {
       toast({
         title: "Registration failed",
-        description: "Please try again or contact support.",
+        description: error?.message,
         variant: "destructive",
       });
       throw error;

@@ -90,7 +90,28 @@ export function OpportunityManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  // Form state based on createOpportunitySchema
+  const [title, setTitle] = useState("");
+  const [type, setType] = useState<
+    "scholarship" | "internship" | "fellowship" | "grant"
+  >("scholarship");
   const [description, setDescription] = useState("");
+  const [fullDescription, setFullDescription] = useState(
+    description.substring(0, 200)
+  );
+  const [deadline, setDeadline] = useState("");
+  const [location, setLocation] = useState("");
+  const [amount, setAmount] = useState("");
+  const [link, setLink] = useState("");
+  const [category, setCategory] = useState("");
+  const [status, setStatus] = useState<"published" | "draft">("draft");
+  const [applicationInstructions, setApplicationInstructions] = useState("");
+
+  // Array fields state
+  const [eligibility, setEligibility] = useState<string[]>([]);
+  const [eligibilityInput, setEligibilityInput] = useState("");
+  const [benefits, setBenefits] = useState<string[]>([]);
+  const [benefitInput, setBenefitInput] = useState("");
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -106,6 +127,73 @@ export function OpportunityManagement() {
     } else {
       setSelectedItems(selectedItems.filter((item) => item !== id));
     }
+  };
+
+  // Helper functions for array fields
+  const addEligibility = () => {
+    if (
+      eligibilityInput.trim() &&
+      !eligibility.includes(eligibilityInput.trim())
+    ) {
+      setEligibility([...eligibility, eligibilityInput.trim()]);
+      setEligibilityInput("");
+    }
+  };
+
+  const removeEligibility = (itemToRemove: string) => {
+    setEligibility(eligibility.filter((item) => item !== itemToRemove));
+  };
+
+  const addBenefit = () => {
+    if (benefitInput.trim() && !benefits.includes(benefitInput.trim())) {
+      setBenefits([...benefits, benefitInput.trim()]);
+      setBenefitInput("");
+    }
+  };
+
+  const removeBenefit = (benefitToRemove: string) => {
+    setBenefits(benefits.filter((benefit) => benefit !== benefitToRemove));
+  };
+
+  // Reset form state
+  const resetForm = () => {
+    setTitle("");
+    setType("scholarship");
+    setDescription("");
+    setFullDescription("");
+    setDeadline("");
+    setLocation("");
+    setAmount("");
+    setLink("");
+    setCategory("");
+    setStatus("draft");
+    setApplicationInstructions("");
+    setEligibility([]);
+    setEligibilityInput("");
+    setBenefits([]);
+    setBenefitInput("");
+  };
+
+  const handleCreateOpportunity = () => {
+    // Form validation and submission logic here
+    const opportunityData = {
+      title,
+      type,
+      description,
+      fullDescription,
+      deadline,
+      location,
+      amount: amount || undefined,
+      link,
+      category,
+      status,
+      applicationInstructions: applicationInstructions || undefined,
+      eligibility: eligibility.length > 0 ? eligibility : undefined,
+      benefits: benefits.length > 0 ? benefits : undefined,
+    };
+
+    console.log("Opportunity data:", opportunityData);
+    resetForm();
   };
 
   const getStatusColor = (status: string) => {
@@ -188,11 +276,21 @@ export function OpportunityManagement() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="deadline">Deadline</Label>
-                  <Input id="deadline" type="date" />
+                  <Input
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                    id="deadline"
+                    type="date"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="location">Location</Label>
-                  <Input id="location" placeholder="Enter location" />
+                  <Input
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    id="location"
+                    placeholder="Enter location"
+                  />
                 </div>
               </div>
               <div>
