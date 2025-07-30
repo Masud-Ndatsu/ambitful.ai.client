@@ -73,7 +73,9 @@ function AdminSidebar({
     <Sidebar className="w-64">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Admin Panel</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xl my-4">
+            Admin Panel
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {sidebarItems.map((item) => (
@@ -184,11 +186,11 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
 
   // Check authentication and admin role
-  useEffect(() => {
-    if (!isAuthenticated || !isAdmin) {
-      navigate("/");
-    }
-  }, [isAuthenticated, isAdmin, navigate]);
+  // useEffect(() => {
+  //   if (!isAuthenticated || !isAdmin) {
+  //     navigate("/");
+  //   }
+  // }, [isAuthenticated, isAdmin, navigate]);
 
   // Custom logout function that navigates to home
   const handleLogout = async () => {

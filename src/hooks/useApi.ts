@@ -34,6 +34,7 @@ export function useApi<T>(
     } catch (error) {
       const apiError = error as ApiError;
       setState({ data: null, loading: false, error: apiError });
+      console.log({ apiError });
       throw error;
     }
   }, deps);

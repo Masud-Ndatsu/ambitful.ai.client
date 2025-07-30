@@ -31,6 +31,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import TextEditor from "../RichTextEditor";
+import { useAdminOpportunities } from "@/hooks/useAdminOpportunities";
+import { useToast } from "@/hooks/use-toast";
 
 const opportunities = [
   {
@@ -86,7 +88,7 @@ const opportunities = [
 ];
 
 export function OpportunityManagement() {
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -96,32 +98,36 @@ export function OpportunityManagement() {
     "scholarship" | "internship" | "fellowship" | "grant"
   >("scholarship");
   const [description, setDescription] = useState("");
-  const [fullDescription, setFullDescription] = useState(
-    description.substring(0, 200)
-  );
+  const [fullDescription, setFullDescription] = useState("");
   const [deadline, setDeadline] = useState("");
   const [location, setLocation] = useState("");
-  const [amount, setAmount] = useState("");
+  // const [amount, setAmount] = useState("");
   const [link, setLink] = useState("");
   const [category, setCategory] = useState("");
   const [status, setStatus] = useState<"published" | "draft">("draft");
-  const [applicationInstructions, setApplicationInstructions] = useState("");
+  // const [applicationInstructions, setApplicationInstructions] = useState("");
 
   // Array fields state
-  const [eligibility, setEligibility] = useState<string[]>([]);
-  const [eligibilityInput, setEligibilityInput] = useState("");
-  const [benefits, setBenefits] = useState<string[]>([]);
-  const [benefitInput, setBenefitInput] = useState("");
+  // const [eligibility, setEligibility] = useState<string[]>([]);
+  // const [eligibilityInput, setEligibilityInput] = useState("");
+  // const [benefits, setBenefits] = useState<string[]>([]);
+  // const [benefitInput, setBenefitInput] = useState("");
+
+  // Admin hooks
+  const { createOpportunity, opportunities: _opp } = useAdminOpportunities();
+  const { toast } = useToast();
+
+  console.log({ _opp });
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedItems(opportunities.map((opp) => opp.id));
+      setSelectedItems(_opp.map((opp) => opp.id));
     } else {
       setSelectedItems([]);
     }
   };
 
-  const handleSelectItem = (id: number, checked: boolean) => {
+  const handleSelectItem = (id: string, checked: boolean) => {
     if (checked) {
       setSelectedItems([...selectedItems, id]);
     } else {
@@ -129,31 +135,33 @@ export function OpportunityManagement() {
     }
   };
 
-  // Helper functions for array fields
-  const addEligibility = () => {
-    if (
-      eligibilityInput.trim() &&
-      !eligibility.includes(eligibilityInput.trim())
-    ) {
-      setEligibility([...eligibility, eligibilityInput.trim()]);
-      setEligibilityInput("");
-    }
-  };
+  // // Helper functions for array fields
+  // const addEligibility = () => {
+  //   if (
+  //     eligibilityInput.trim() &&
+  //     !eligibility.includes(eligibilityInput.trim())
+  //   ) {
+  //     setEligibility([...eligibility, eligibilityInput.trim()]);
+  //     setEligibilityInput("");
+  //   }
+  // };
 
-  const removeEligibility = (itemToRemove: string) => {
-    setEligibility(eligibility.filter((item) => item !== itemToRemove));
-  };
+  // const removeEligibility = (itemToRemove: string) => {
+  //   setEligibility(eligibility.filter((item) => item !== itemToRemove));
+  // };
 
-  const addBenefit = () => {
-    if (benefitInput.trim() && !benefits.includes(benefitInput.trim())) {
-      setBenefits([...benefits, benefitInput.trim()]);
-      setBenefitInput("");
-    }
-  };
+  // const addBenefit = () => {
+  //   if (benefitInput.trim() && !benefits.includes(benefitInput.trim())) {
+  //     setBenefits([...benefits, benefitInput.trim()]);
+  //     setBenefitInput("");
+  //   }
+  // };
 
-  const removeBenefit = (benefitToRemove: string) => {
-    setBenefits(benefits.filter((benefit) => benefit !== benefitToRemove));
-  };
+  // const removeBenefit = (benefitToRemove: string) => {
+  //   setBenefits(benefits.filter((benefit) => benefit !== benefitToRemove));
+  // };
+
+  // _.map(o => o.)
 
   // Reset form state
   const resetForm = () => {
@@ -163,37 +171,99 @@ export function OpportunityManagement() {
     setFullDescription("");
     setDeadline("");
     setLocation("");
-    setAmount("");
+    // setAmount("");
     setLink("");
     setCategory("");
     setStatus("draft");
-    setApplicationInstructions("");
-    setEligibility([]);
-    setEligibilityInput("");
-    setBenefits([]);
-    setBenefitInput("");
+    // setApplicationInstructions("");
+    // setEligibility([]);
+    // setEligibilityInput("");
+    // setBenefits([]);
+    // setBenefitInput("");
   };
 
-  const handleCreateOpportunity = () => {
-    // Form validation and submission logic here
-    const opportunityData = {
-      title,
-      type,
-      description,
-      fullDescription,
-      deadline,
-      location,
-      amount: amount || undefined,
-      link,
-      category,
-      status,
-      applicationInstructions: applicationInstructions || undefined,
-      eligibility: eligibility.length > 0 ? eligibility : undefined,
-      benefits: benefits.length > 0 ? benefits : undefined,
-    };
+  const handleCreateOpportunity = async () => {
+    try {
+      // Basic form validation
+      if (!title.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Title is required",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!description.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Description is required",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    console.log("Opportunity data:", opportunityData);
-    resetForm();
+      if (!deadline) {
+        toast({
+          title: "Validation Error",
+          description: "Deadline is required",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!location.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Location is required",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!link.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Application link is required",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!category.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Category is required",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const opportunityData = {
+        title: title.trim(),
+        type,
+        description: description.trim().substring(0, 200),
+        fullDescription: description.trim(),
+        deadline,
+        location: location.trim(),
+        link: link.trim(),
+        category: category.trim(),
+        status,
+      };
+
+      await createOpportunity(opportunityData);
+
+      // Success notification
+      toast({
+        title: "Success",
+        description: "Opportunity created successfully!",
+        variant: "default",
+      });
+      resetForm();
+    } catch (error) {
+      console.error("Error creating opportunity:", error);
+      toast({
+        title: "Error",
+        description: error?.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -209,7 +279,7 @@ export function OpportunityManagement() {
     }
   };
 
-  const filteredOpportunities = opportunities.filter((opp) => {
+  const filteredOpportunities = _opp.filter((opp) => {
     const matchesStatus =
       statusFilter === "all" || opp.status.toLowerCase() === statusFilter;
     const matchesCategory =
@@ -247,22 +317,45 @@ export function OpportunityManagement() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="title">Title</Label>
-                  <Input id="title" placeholder="Enter opportunity title" />
+                  <Input
+                    id="title"
+                    placeholder="Enter opportunity title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select>
+                  <Label htmlFor="type">Type</Label>
+                  <Select
+                    value={type}
+                    onValueChange={(
+                      value:
+                        | "scholarship"
+                        | "internship"
+                        | "fellowship"
+                        | "grant"
+                    ) => setType(value)}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="technology">Technology</SelectItem>
-                      <SelectItem value="education">Education</SelectItem>
-                      <SelectItem value="environment">Environment</SelectItem>
-                      <SelectItem value="finance">Finance</SelectItem>
+                      <SelectItem value="scholarship">Scholarship</SelectItem>
+                      <SelectItem value="internship">Internship</SelectItem>
+                      <SelectItem value="fellowship">Fellowship</SelectItem>
+                      <SelectItem value="grant">Grant</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Input
+                  id="category"
+                  placeholder="Enter category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                />
               </div>
               <div>
                 <Label htmlFor="description">Description</Label>
@@ -295,11 +388,31 @@ export function OpportunityManagement() {
               </div>
               <div>
                 <Label htmlFor="link">Application Link</Label>
-                <Input id="link" placeholder="https://" />
+                <Input
+                  id="link"
+                  placeholder="https://"
+                  value={link}
+                  onChange={(e) => setLink(e.target.value)}
+                />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline">Save as Draft</Button>
-                <Button>Publish</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setStatus("draft");
+                    handleCreateOpportunity();
+                  }}
+                >
+                  Save as Draft
+                </Button>
+                <Button
+                  onClick={() => {
+                    setStatus("published");
+                    handleCreateOpportunity();
+                  }}
+                >
+                  Publish
+                </Button>
               </div>
             </div>
           </DialogContent>
@@ -421,7 +534,7 @@ export function OpportunityManagement() {
                     />
                   </TableCell>
                   <TableCell className="font-medium">
-                    {opportunity.title}
+                    {opportunity.title.substring(0, 20)}
                   </TableCell>
                   <TableCell>{opportunity.category}</TableCell>
                   <TableCell>
@@ -429,8 +542,8 @@ export function OpportunityManagement() {
                       {opportunity.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{opportunity.dateAdded}</TableCell>
-                  <TableCell>{opportunity.author}</TableCell>
+                  <TableCell>{opportunity.createdAt}</TableCell>
+                  <TableCell>{opportunity.createdAt}</TableCell>
                   <TableCell className="text-right">
                     {opportunity.views}
                   </TableCell>

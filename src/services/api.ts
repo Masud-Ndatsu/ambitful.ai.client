@@ -55,9 +55,11 @@ class ApiService {
       const response = await fetch(url, config);
       const data = await response.json();
 
+      console.log({ response: data });
+
       if (!response.ok) {
         throw {
-          message: data.message || "Request failed",
+          message: data.error || "Request failed",
           status: response.status,
           code: data.code,
         } as ApiError;
