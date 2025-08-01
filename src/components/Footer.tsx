@@ -1,7 +1,15 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Phone, MapPin, Twitter, Linkedin, Instagram, Github } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Twitter,
+  Linkedin,
+  Instagram,
+  Github,
+} from "lucide-react";
 
 const Footer = () => {
   return (
@@ -17,19 +25,36 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-muted mb-6 leading-relaxed">
-              Empowering young people worldwide to discover life-changing opportunities through the power of artificial intelligence.
+              Empowering young people worldwide to discover life-changing
+              opportunities through the power of artificial intelligence.
             </p>
             <div className="flex space-x-4">
-              <Button variant="ghost" size="sm" className="text-muted hover:text-background p-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted hover:text-background p-2"
+              >
                 <Twitter className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="sm" className="text-muted hover:text-background p-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted hover:text-background p-2"
+              >
                 <Linkedin className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="sm" className="text-muted hover:text-background p-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted hover:text-background p-2"
+              >
                 <Instagram className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="sm" className="text-muted hover:text-background p-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted hover:text-background p-2"
+              >
                 <Github className="h-5 w-5" />
               </Button>
             </div>
@@ -40,27 +65,42 @@ const Footer = () => {
             <h3 className="font-semibold text-lg mb-4">Quick Links</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#home" className="text-muted hover:text-background transition-colors">
+                <a
+                  href="#home"
+                  className="text-muted hover:text-background transition-colors"
+                >
                   Home
                 </a>
               </li>
               <li>
-                <a href="#opportunities" className="text-muted hover:text-background transition-colors">
+                <a
+                  href="#opportunities"
+                  className="text-muted hover:text-background transition-colors"
+                >
                   Browse Opportunities
                 </a>
               </li>
               <li>
-                <a href="#categories" className="text-muted hover:text-background transition-colors">
+                <a
+                  href="#categories"
+                  className="text-muted hover:text-background transition-colors"
+                >
                   Categories
                 </a>
               </li>
               <li>
-                <a href="#about" className="text-muted hover:text-background transition-colors">
+                <a
+                  href="#about"
+                  className="text-muted hover:text-background transition-colors"
+                >
                   About Us
                 </a>
               </li>
               <li>
-                <a href="#faq" className="text-muted hover:text-background transition-colors">
+                <a
+                  href="#faq"
+                  className="text-muted hover:text-background transition-colors"
+                >
                   FAQ
                 </a>
               </li>
@@ -72,27 +112,42 @@ const Footer = () => {
             <h3 className="font-semibold text-lg mb-4">Support</h3>
             <ul className="space-y-3">
               <li>
-                <a href="#help" className="text-muted hover:text-background transition-colors">
+                <a
+                  href="#help"
+                  className="text-muted hover:text-background transition-colors"
+                >
                   Help Center
                 </a>
               </li>
               <li>
-                <a href="#contact" className="text-muted hover:text-background transition-colors">
+                <a
+                  href="#contact"
+                  className="text-muted hover:text-background transition-colors"
+                >
                   Contact Us
                 </a>
               </li>
               <li>
-                <a href="#privacy" className="text-muted hover:text-background transition-colors">
+                <a
+                  href="#privacy"
+                  className="text-muted hover:text-background transition-colors"
+                >
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#terms" className="text-muted hover:text-background transition-colors">
+                <a
+                  href="#terms"
+                  className="text-muted hover:text-background transition-colors"
+                >
                   Terms of Service
                 </a>
               </li>
               <li>
-                <a href="#feedback" className="text-muted hover:text-background transition-colors">
+                <a
+                  href="#feedback"
+                  className="text-muted hover:text-background transition-colors"
+                >
                   Send Feedback
                 </a>
               </li>
@@ -144,13 +199,22 @@ const Footer = () => {
             © 2024 OpportunityAI. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#accessibility" className="text-muted hover:text-background text-sm transition-colors">
+            <a
+              href="#accessibility"
+              className="text-muted hover:text-background text-sm transition-colors"
+            >
               Accessibility
             </a>
-            <a href="#sitemap" className="text-muted hover:text-background text-sm transition-colors">
+            <a
+              href="#sitemap"
+              className="text-muted hover:text-background text-sm transition-colors"
+            >
               Sitemap
             </a>
-            <a href="#cookies" className="text-muted hover:text-background text-sm transition-colors">
+            <a
+              href="#cookies"
+              className="text-muted hover:text-background text-sm transition-colors"
+            >
               Cookie Policy
             </a>
           </div>

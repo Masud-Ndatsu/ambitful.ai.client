@@ -1,29 +1,39 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export interface Opportunity {
   id: string;
   title: string;
   description: string;
-  company: string;
+  fullDescription?: string;
+  type: "scholarship" | "internship" | "fellowship" | "grant";
+  category: string;
   location: string;
+  deadline: string;
+  amount: string | null;
+  link: string;
+  status: "published" | "draft" | "archived";
+  createdAt: string;
+  updatedAt: string;
+  views: number;
+  applications: number;
+  saves?: number;
+  // Extended fields for detailed view
+  applicationInstructions?: string[];
+  eligibility?: string[];
+  benefits?: string[];
+  // Legacy fields for backward compatibility  
+  company?: string;
   salary?: {
     min: number;
     max: number;
     currency: string;
   };
-  type: "full-time" | "part-time" | "contract" | "internship";
-  category: string;
-  tags: string[];
-  requirements: string[];
-  benefits: string[];
-  remote: boolean;
-  featured: boolean;
-  status: "active" | "inactive" | "closed";
-  createdAt: string;
-  updatedAt: string;
+  tags?: string[];
+  requirements?: string[];
+  remote?: boolean;
+  featured?: boolean;
   applicationDeadline?: string;
   contactEmail?: string;
   applicationUrl?: string;
-  views: number;
-  applications: number;
 }
 
 export interface OpportunityFilters {
@@ -98,4 +108,13 @@ export interface UserApplication {
   appliedAt: string;
   coverLetter?: string;
   additionalInfo?: string;
+}
+
+export interface ShareOpportunityData {
+  method: "email" | "link" | "social";
+  email?: string;
+}
+
+export interface SavedOpportunitiesFilters extends OpportunityFilters {
+  // Additional filters specific to saved opportunities
 }

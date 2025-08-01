@@ -9,6 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { countries } from "@/data";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { LoginCredentials, RegisterData } from "@/types";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -17,24 +28,117 @@ interface AuthModalProps {
 
 export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
     fullName: "",
+    country: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { login, register } = useAuth();
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual authentication
-    console.log(isLogin ? "Login" : "Signup", formData);
-    onClose();
+    setIsLoading(true);
+
+    try {
+      if (isLogin) {
+        // Login
+        const credentials: LoginCredentials = {
+          email: formData.email,
+          password: formData.password,
+        };
+        await login(credentials);
+      } else {
+        // Register - Validation
+        if (!formData.fullName.trim()) {
+          toast({
+            title: "Error",
+            description: "Full name is required",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (!formData.country) {
+          toast({
+            title: "Error",
+            description: "Please select your country",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (formData.password !== formData.confirmPassword) {
+          toast({
+            title: "Error",
+            description: "Passwords do not match",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (formData.password.length < 8) {
+          toast({
+            title: "Error",
+            description: "Password must be at least 8 characters long",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const registerData: RegisterData = {
+          email: formData.email,
+          password: formData.password,
+          name: formData.fullName,
+          country: formData.country,
+        };
+        await register(registerData);
+      }
+
+      onClose();
+      // Reset form
+      setFormData({
+        email: "",
+        password: "",
+        confirmPassword: "",
+        fullName: "",
+        country: "",
+      });
+    } catch (error) {
+      // Error handling is done in the useAuth hook
+      console.error("Auth error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleCountryChange = (value: string) => {
+    setFormData({
+      ...formData,
+      country: value,
+    });
+  };
+
+  const handleToggleMode = () => {
+    setIsLogin(!isLogin);
+    // Reset form when switching modes
+    setFormData({
+      email: "",
+      password: "",
+      confirmPassword: "",
+      fullName: "",
+      country: "",
     });
   };
 
@@ -49,18 +153,40 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                name="fullName"
-                type="text"
-                placeholder="Enter your full name"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={formData.fullName}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="country">Country</Label>
+                <Select
+                  value={formData.country}
+                  onValueChange={handleCountryChange}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((country) => (
+                      <SelectItem key={country.value} value={country.value}>
+                        {country.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
           )}
 
           <div className="space-y-2">
@@ -82,11 +208,29 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
               id="password"
               name="password"
               type="password"
-              placeholder="Enter your password"
+              placeholder={
+                isLogin
+                  ? "Enter your password"
+                  : "Create a password (min. 8 characters)"
+              }
               value={formData.password}
               onChange={handleInputChange}
               required
             />
+            {!isLogin && formData.password && (
+              <div className="text-xs text-muted-foreground">
+                Password strength:{" "}
+                {formData.password.length >= 8 ? (
+                  formData.password.length >= 12 ? (
+                    <span className="text-green-600">Strong</span>
+                  ) : (
+                    <span className="text-yellow-600">Good</span>
+                  )
+                ) : (
+                  <span className="text-red-600">Weak</span>
+                )}
+              </div>
+            )}
           </div>
 
           {!isLogin && (
@@ -104,8 +248,17 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             </div>
           )}
 
-          <Button type="submit" className="w-full">
-            {isLogin ? "Sign In" : "Create Account"}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-foreground"></div>
+                {isLogin ? "Signing In..." : "Creating Account..."}
+              </>
+            ) : isLogin ? (
+              "Sign In"
+            ) : (
+              "Create Account"
+            )}
           </Button>
         </form>
 
@@ -158,7 +311,7 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
           {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
           <button
             type="button"
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={handleToggleMode}
             className="text-primary hover:underline font-medium"
           >
             {isLogin ? "Sign up" : "Sign in"}

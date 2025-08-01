@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       toast({
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: error.message,
         variant: "destructive",
       });
       throw error;
@@ -72,11 +72,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast({
         title: "Welcome!",
         description: "Your account has been created successfully.",
+        variant: "default",
       });
     } catch (error) {
       toast({
         title: "Registration failed",
-        description: "Please try again or contact support.",
+        description: error?.message,
         variant: "destructive",
       });
       throw error;

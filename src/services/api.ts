@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// API Service Layer
-export interface ApiResponse<T> {
+import { env } from "@/config";
+
+// Generic API Response Interface
+export interface ApiResponse<T = any> {
+  success: boolean;
   data: T;
-  message?: string;
-  status: number;
+  message: string;
 }
 
 export interface ApiError {
@@ -13,7 +15,7 @@ export interface ApiError {
 }
 
 class ApiService {
-  private baseURL = "/api";
+  private baseURL = env.API_URL;
   private token: string | null = null;
 
   setAuthToken(token: string) {
@@ -33,10 +35,14 @@ class ApiService {
     localStorage.removeItem("auth_token");
   }
 
+  getBaseURL(): string {
+    return this.baseURL;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     const token = this.getAuthToken();
 
@@ -53,19 +59,23 @@ class ApiService {
       const response = await fetch(url, config);
       const data = await response.json();
 
+      console.log({ response: data });
+
       if (!response.ok) {
         throw {
-          message: data.message || "Request failed",
+          message: data?.error?.message || "Request failed",
           status: response.status,
           code: data.code,
         } as ApiError;
       }
 
-      return {
-        data,
-        status: response.status,
-        message: data.message,
-      };
+      // Expect API responses to follow: { success: boolean, data: T, message: string }
+      if (data.success !== undefined && data.data !== undefined) {
+        return data.data;
+      }
+
+      // Fallback for responses that don't follow the standard format
+      return data;
     } catch (error) {
       if (error instanceof Error) {
         throw {
@@ -78,12 +88,12 @@ class ApiService {
   }
 
   // GET request
-  async get<T>(endpoint: string): Promise<ApiResponse<T>> {
+  async get<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: "GET" });
   }
 
   // POST request
-  async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async post<T>(endpoint: string, data?: any): Promise<T> {
     return this.request<T>(endpoint, {
       method: "POST",
       body: data ? JSON.stringify(data) : undefined,
@@ -91,7 +101,7 @@ class ApiService {
   }
 
   // PUT request
-  async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async put<T>(endpoint: string, data?: any): Promise<T> {
     return this.request<T>(endpoint, {
       method: "PUT",
       body: data ? JSON.stringify(data) : undefined,
@@ -99,7 +109,7 @@ class ApiService {
   }
 
   // DELETE request
-  async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
+  async delete<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: "DELETE" });
   }
 }
