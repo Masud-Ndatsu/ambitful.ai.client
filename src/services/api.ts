@@ -35,6 +35,10 @@ class ApiService {
     localStorage.removeItem("auth_token");
   }
 
+  getBaseURL(): string {
+    return this.baseURL;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -59,7 +63,7 @@ class ApiService {
 
       if (!response.ok) {
         throw {
-          message: data.error || "Request failed",
+          message: data?.error?.message || "Request failed",
           status: response.status,
           code: data.code,
         } as ApiError;
