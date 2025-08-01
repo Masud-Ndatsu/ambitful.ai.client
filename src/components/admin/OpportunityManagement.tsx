@@ -28,6 +28,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import TextEditor from "../RichTextEditor";
@@ -114,24 +125,48 @@ export function OpportunityManagement() {
   // const [benefitInput, setBenefitInput] = useState("");
 
   // Admin hooks
-  const { createOpportunity, opportunities: _opp } = useAdminOpportunities();
+  const {
+    createOpportunity,
+    opportunities: _opp,
+    bulkAction,
+    bulkActioning,
+  } = useAdminOpportunities();
   const { toast } = useToast();
 
   console.log({ _opp });
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedItems(_opp.map((opp) => opp.id));
-    } else {
-      setSelectedItems([]);
-    }
-  };
 
   const handleSelectItem = (id: string, checked: boolean) => {
     if (checked) {
       setSelectedItems([...selectedItems, id]);
     } else {
       setSelectedItems(selectedItems.filter((item) => item !== id));
+    }
+  };
+
+  const handleBulkAction = async (action: "publish" | "archive" | "delete") => {
+    if (selectedItems.length === 0) {
+      toast({
+        title: "No items selected",
+        description: "Please select items to perform bulk action",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const result = await bulkAction(selectedItems, action);
+      toast({
+        title: "Success",
+        description: `${result.affected} item(s) ${action}ed successfully`,
+        variant: "default",
+      });
+      setSelectedItems([]);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to ${action} items: ${error?.message}`,
+        variant: "destructive",
+      });
     }
   };
 
@@ -289,6 +324,14 @@ export function OpportunityManagement() {
       .includes(searchQuery.toLowerCase());
     return matchesStatus && matchesCategory && matchesSearch;
   });
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedItems(filteredOpportunities.map((opp) => opp.id));
+    } else {
+      setSelectedItems([]);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -483,15 +526,51 @@ export function OpportunityManagement() {
               <span className="text-sm text-muted-foreground">
                 {selectedItems.length} item(s) selected
               </span>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={bulkActioning}
+                onClick={() => handleBulkAction("publish")}
+              >
                 Bulk Publish
               </Button>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={bulkActioning}
+                onClick={() => handleBulkAction("archive")}
+              >
                 Bulk Archive
               </Button>
-              <Button variant="destructive" size="sm">
-                Bulk Delete
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={bulkActioning}
+                  >
+                    Bulk Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirm Bulk Delete</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete {selectedItems.length}{" "}
+                      selected opportunity(ies)? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleBulkAction("delete")}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </CardContent>
         </Card>
@@ -508,7 +587,10 @@ export function OpportunityManagement() {
               <TableRow>
                 <TableHead className="w-12">
                   <Checkbox
-                    checked={selectedItems.length === opportunities.length}
+                    checked={
+                      selectedItems.length === filteredOpportunities.length &&
+                      filteredOpportunities.length > 0
+                    }
                     onCheckedChange={handleSelectAll}
                   />
                 </TableHead>

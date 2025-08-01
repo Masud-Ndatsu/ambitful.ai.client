@@ -1,9 +1,19 @@
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { CalendarIcon, Filter, X } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
@@ -23,56 +33,79 @@ interface OpportunityFiltersProps {
 }
 
 const categories = [
-  "Technology", "Healthcare", "Education", "Business", 
-  "Arts & Culture", "Environment", "Social Impact", "Research"
+  "Technology",
+  "Healthcare",
+  "Education",
+  "Business",
+  "Arts & Culture",
+  "Environment",
+  "Social Impact",
+  "Research",
 ];
 
 const locations = [
-  "Remote", "United States", "United Kingdom", "Canada", 
-  "Australia", "Germany", "Netherlands", "Global"
+  "Remote",
+  "United States",
+  "United Kingdom",
+  "Canada",
+  "Australia",
+  "Germany",
+  "Netherlands",
+  "Global",
 ];
 
-const types = ["Scholarship", "Internship", "Fellowship", "Grant", "Competition"];
+const types = [
+  "Scholarship",
+  "Internship",
+  "Fellowship",
+  "Grant",
+  "Competition",
+];
 
 const deadlineOptions = [
   { value: "next-7-days", label: "Next 7 days" },
   { value: "this-month", label: "This month" },
   { value: "next-3-months", label: "Next 3 months" },
-  { value: "custom", label: "Custom range" }
+  { value: "custom", label: "Custom range" },
 ];
 
 const sortOptions = [
   { value: "newest", label: "Newest first" },
   { value: "deadline-soon", label: "Deadline approaching" },
   { value: "popular", label: "Most popular" },
-  { value: "amount-high", label: "Highest amount" }
+  { value: "amount-high", label: "Highest amount" },
 ];
 
-export const OpportunityFilters = ({ filters, onFiltersChange }: OpportunityFiltersProps) => {
+export const OpportunityFilters = ({
+  filters,
+  onFiltersChange,
+}: OpportunityFiltersProps) => {
   const [showCustomDate, setShowCustomDate] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
+  console.log({ filters });
+
   const handleCategoryChange = (category: string, checked: boolean) => {
-    const newCategories = checked 
+    const newCategories = checked
       ? [...filters.categories, category]
-      : filters.categories.filter(c => c !== category);
-    
+      : filters.categories.filter((c) => c !== category);
+
     onFiltersChange({ ...filters, categories: newCategories });
   };
 
   const handleTypeChange = (type: string, checked: boolean) => {
-    const newTypes = checked 
+    const newTypes = checked
       ? [...filters.types, type]
-      : filters.types.filter(t => t !== type);
-    
+      : filters.types.filter((t) => t !== type);
+
     onFiltersChange({ ...filters, types: newTypes });
   };
 
   const handleLocationChange = (location: string, checked: boolean) => {
-    const newLocations = checked 
+    const newLocations = checked
       ? [...filters.locations, location]
-      : filters.locations.filter(l => l !== location);
-    
+      : filters.locations.filter((l) => l !== location);
+
     onFiltersChange({ ...filters, locations: newLocations });
   };
 
@@ -87,16 +120,17 @@ export const OpportunityFilters = ({ filters, onFiltersChange }: OpportunityFilt
       locations: [],
       types: [],
       deadlines: "",
-      sortBy: "newest"
+      sortBy: "newest",
     });
     setShowCustomDate(false);
     setDateRange(undefined);
   };
 
-  const hasActiveFilters = filters.categories.length > 0 || 
-                          filters.locations.length > 0 || 
-                          filters.types.length > 0 || 
-                          filters.deadlines;
+  const hasActiveFilters =
+    filters.categories.length > 0 ||
+    filters.locations.length > 0 ||
+    filters.types.length > 0 ||
+    filters.deadlines;
 
   return (
     <Card className="p-6 bg-gradient-card border-0 shadow-soft">
@@ -105,7 +139,7 @@ export const OpportunityFilters = ({ filters, onFiltersChange }: OpportunityFilt
           <Filter className="h-5 w-5 text-primary" />
           <h3 className="font-semibold text-foreground">Filters</h3>
         </div>
-        
+
         {hasActiveFilters && (
           <Button
             variant="ghost"
@@ -125,7 +159,12 @@ export const OpportunityFilters = ({ filters, onFiltersChange }: OpportunityFilt
           <label className="text-sm font-medium text-foreground mb-3 block">
             Sort by
           </label>
-          <Select value={filters.sortBy} onValueChange={(value) => onFiltersChange({ ...filters, sortBy: value })}>
+          <Select
+            value={filters.sortBy}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, sortBy: value })
+            }
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -150,7 +189,9 @@ export const OpportunityFilters = ({ filters, onFiltersChange }: OpportunityFilt
                 <Checkbox
                   id={`type-${type}`}
                   checked={filters.types.includes(type)}
-                  onCheckedChange={(checked) => handleTypeChange(type, checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    handleTypeChange(type, checked as boolean)
+                  }
                 />
                 <label
                   htmlFor={`type-${type}`}
@@ -174,7 +215,9 @@ export const OpportunityFilters = ({ filters, onFiltersChange }: OpportunityFilt
                 <Checkbox
                   id={`category-${category}`}
                   checked={filters.categories.includes(category)}
-                  onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    handleCategoryChange(category, checked as boolean)
+                  }
                 />
                 <label
                   htmlFor={`category-${category}`}
@@ -198,7 +241,9 @@ export const OpportunityFilters = ({ filters, onFiltersChange }: OpportunityFilt
                 <Checkbox
                   id={`location-${location}`}
                   checked={filters.locations.includes(location)}
-                  onCheckedChange={(checked) => handleLocationChange(location, checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    handleLocationChange(location, checked as boolean)
+                  }
                 />
                 <label
                   htmlFor={`location-${location}`}
@@ -216,7 +261,10 @@ export const OpportunityFilters = ({ filters, onFiltersChange }: OpportunityFilt
           <label className="text-sm font-medium text-foreground mb-3 block">
             Deadline
           </label>
-          <Select value={filters.deadlines} onValueChange={handleDeadlineChange}>
+          <Select
+            value={filters.deadlines}
+            onValueChange={handleDeadlineChange}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select deadline filter" />
             </SelectTrigger>
@@ -228,17 +276,22 @@ export const OpportunityFilters = ({ filters, onFiltersChange }: OpportunityFilt
               ))}
             </SelectContent>
           </Select>
-          
+
           {showCustomDate && (
             <div className="mt-3">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left"
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateRange?.from && dateRange?.to 
-                      ? `${format(dateRange.from, "MMM dd")} - ${format(dateRange.to, "MMM dd")}`
-                      : "Select date range"
-                    }
+                    {dateRange?.from && dateRange?.to
+                      ? `${format(dateRange.from, "MMM dd")} - ${format(
+                          dateRange.to,
+                          "MMM dd"
+                        )}`
+                      : "Select date range"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
