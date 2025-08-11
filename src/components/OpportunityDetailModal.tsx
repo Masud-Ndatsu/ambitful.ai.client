@@ -19,7 +19,7 @@ import {
   Users,
 } from "lucide-react";
 import { OpportunityCard } from "./OpportunityCard";
-import { useOpportunities } from "@/hooks/useOpportunities";
+import { useOpportunities } from "@/hooks/use-opportunities";
 import type { Opportunity } from "@/types/opportunity";
 
 interface OpportunityDetailModalProps {
@@ -47,7 +47,9 @@ export const OpportunityDetailModal = ({
   onClose,
 }: OpportunityDetailModalProps) => {
   const { getSimilarOpportunities } = useOpportunities();
-  const [similarOpportunities, setSimilarOpportunities] = useState<Opportunity[]>([]);
+  const [similarOpportunities, setSimilarOpportunities] = useState<
+    Opportunity[]
+  >([]);
   const [loadingSimilar, setLoadingSimilar] = useState(true);
 
   // Load similar opportunities when modal opens
@@ -295,7 +297,9 @@ export const OpportunityDetailModal = ({
             </h3>
             {loadingSimilar ? (
               <div className="flex justify-center py-8">
-                <div className="text-muted-foreground">Loading similar opportunities...</div>
+                <div className="text-muted-foreground">
+                  Loading similar opportunities...
+                </div>
               </div>
             ) : similarOpportunities.length > 0 ? (
               <div className="grid md:grid-cols-2 gap-4">
@@ -317,7 +321,9 @@ export const OpportunityDetailModal = ({
               </div>
             ) : (
               <div className="text-center py-8">
-                <div className="text-muted-foreground">No similar opportunities found.</div>
+                <div className="text-muted-foreground">
+                  No similar opportunities found.
+                </div>
               </div>
             )}
           </div>

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useApi, useMutation } from "./useApi";
+import { useApi, useMutation } from "./use-api";
 import { adminService } from "@/services/adminService";
 import type {
   AdminOpportunity,

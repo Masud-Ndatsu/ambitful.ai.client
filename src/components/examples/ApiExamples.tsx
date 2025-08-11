@@ -1,62 +1,60 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { useApi, useMutation } from '@/hooks/useApi';
-import { useAuth } from '@/hooks/useAuth';
-import { opportunityService, OpportunityFilters } from '@/services/opportunityService';
-import { adminService } from '@/services/adminService';
-import { Loader2, Search, Filter, Plus, Eye, Edit, Trash2 } from 'lucide-react';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { useApi, useMutation } from "@/hooks/use-api";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  opportunityService,
+  OpportunityFilters,
+} from "@/services/opportunityService";
+import { adminService } from "@/services/adminService";
+import { Loader2, Search, Filter, Plus, Eye, Edit, Trash2 } from "lucide-react";
 
 export function ApiExamples() {
   const { toast } = useToast();
   const { user, isAdmin, login, logout } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
 
   // API Examples - Opportunities
-  const [opportunityFilters, setOpportunityFilters] = useState<OpportunityFilters>({
-    search: '',
-    category: '',
-    type: '',
-    page: 1,
-    limit: 10
-  });
+  const [opportunityFilters, setOpportunityFilters] =
+    useState<OpportunityFilters>({
+      search: "",
+      category: "",
+      type: "",
+      page: 1,
+      limit: 10,
+    });
 
   // Fetch opportunities with filters
   const {
     data: opportunitiesData,
     loading: opportunitiesLoading,
     error: opportunitiesError,
-    refetch: refetchOpportunities
-  } = useApi(
-    () => opportunityService.getOpportunities(opportunityFilters),
-    { deps: [opportunityFilters] }
-  );
+    refetch: refetchOpportunities,
+  } = useApi(() => opportunityService.getOpportunities(opportunityFilters), {
+    deps: [opportunityFilters],
+  });
 
   // Fetch featured opportunities
-  const {
-    data: featuredOpportunities,
-    loading: featuredLoading
-  } = useApi(() => opportunityService.getFeaturedOpportunities(6));
+  const { data: featuredOpportunities, loading: featuredLoading } = useApi(() =>
+    opportunityService.getFeaturedOpportunities(6)
+  );
 
   // Admin Examples (only show if user is admin)
   const {
     data: adminNotifications,
     loading: notificationsLoading,
-    refetch: refetchNotifications
-  } = useApi(
-    () => adminService.getAdminNotifications(),
-    { immediate: isAdmin }
-  );
+    refetch: refetchNotifications,
+  } = useApi(() => adminService.getAdminNotifications(), {
+    immediate: isAdmin,
+  });
 
-  const {
-    data: systemSettings,
-    loading: settingsLoading
-  } = useApi(
+  const { data: systemSettings, loading: settingsLoading } = useApi(
     () => adminService.getSystemSettings(),
     { immediate: isAdmin }
   );
@@ -68,10 +66,10 @@ export function ApiExamples() {
 
   // Handlers
   const handleSearch = () => {
-    setOpportunityFilters(prev => ({
+    setOpportunityFilters((prev) => ({
       ...prev,
       search: searchQuery,
-      page: 1
+      page: 1,
     }));
   };
 
@@ -83,7 +81,7 @@ export function ApiExamples() {
         description: "Logged in successfully",
       });
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
     }
   };
 
@@ -98,11 +96,14 @@ export function ApiExamples() {
     }
 
     try {
-      await applyMutation.mutate([opportunityId, {
-        coverLetter: "I am very interested in this opportunity...",
-        additionalInfo: "Additional information about my qualifications"
-      }]);
-      
+      await applyMutation.mutate([
+        opportunityId,
+        {
+          coverLetter: "I am very interested in this opportunity...",
+          additionalInfo: "Additional information about my qualifications",
+        },
+      ]);
+
       toast({
         title: "Application Submitted",
         description: "Your application has been submitted successfully",
@@ -171,7 +172,9 @@ export function ApiExamples() {
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="auth">Authentication</TabsTrigger>
           <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
-          <TabsTrigger value="admin" disabled={!isAdmin}>Admin</TabsTrigger>
+          <TabsTrigger value="admin" disabled={!isAdmin}>
+            Admin
+          </TabsTrigger>
           <TabsTrigger value="examples">Code Examples</TabsTrigger>
         </TabsList>
 
@@ -184,9 +187,15 @@ export function ApiExamples() {
             <CardContent className="space-y-4">
               {user ? (
                 <div className="space-y-2">
-                  <p className="text-sm">Welcome, <strong>{user.name}</strong>!</p>
-                  <p className="text-sm text-muted-foreground">Email: {user.email}</p>
-                  <p className="text-sm text-muted-foreground">Role: {user.role}</p>
+                  <p className="text-sm">
+                    Welcome, <strong>{user.name}</strong>!
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Email: {user.email}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Role: {user.role}
+                  </p>
                   <Button onClick={logout} variant="outline">
                     Logout
                   </Button>
@@ -198,13 +207,23 @@ export function ApiExamples() {
                       placeholder="Email"
                       type="email"
                       value={loginForm.email}
-                      onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
+                      onChange={(e) =>
+                        setLoginForm((prev) => ({
+                          ...prev,
+                          email: e.target.value,
+                        }))
+                      }
                     />
                     <Input
                       placeholder="Password"
                       type="password"
                       value={loginForm.password}
-                      onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
+                      onChange={(e) =>
+                        setLoginForm((prev) => ({
+                          ...prev,
+                          password: e.target.value,
+                        }))
+                      }
                     />
                   </div>
                   <Button onClick={handleLogin} className="w-full">
@@ -232,17 +251,22 @@ export function ApiExamples() {
                   placeholder="Search opportunities..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 />
                 <Button onClick={handleSearch} disabled={opportunitiesLoading}>
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
-              
+
               <div className="grid grid-cols-3 gap-4">
                 <select
-                  value={opportunityFilters.category || ''}
-                  onChange={(e) => setOpportunityFilters(prev => ({ ...prev, category: e.target.value || undefined }))}
+                  value={opportunityFilters.category || ""}
+                  onChange={(e) =>
+                    setOpportunityFilters((prev) => ({
+                      ...prev,
+                      category: e.target.value || undefined,
+                    }))
+                  }
                   className="px-3 py-2 border rounded-md"
                 >
                   <option value="">All Categories</option>
@@ -250,10 +274,15 @@ export function ApiExamples() {
                   <option value="design">Design</option>
                   <option value="marketing">Marketing</option>
                 </select>
-                
+
                 <select
-                  value={opportunityFilters.type || ''}
-                  onChange={(e) => setOpportunityFilters(prev => ({ ...prev, type: e.target.value || undefined }))}
+                  value={opportunityFilters.type || ""}
+                  onChange={(e) =>
+                    setOpportunityFilters((prev) => ({
+                      ...prev,
+                      type: e.target.value || undefined,
+                    }))
+                  }
                   className="px-3 py-2 border rounded-md"
                 >
                   <option value="">All Types</option>
@@ -261,16 +290,18 @@ export function ApiExamples() {
                   <option value="part-time">Part Time</option>
                   <option value="contract">Contract</option>
                 </select>
-                
-                <Button 
-                  variant="outline" 
-                  onClick={() => setOpportunityFilters({
-                    search: '',
-                    category: '',
-                    type: '',
-                    page: 1,
-                    limit: 10
-                  })}
+
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setOpportunityFilters({
+                      search: "",
+                      category: "",
+                      type: "",
+                      page: 1,
+                      limit: 10,
+                    })
+                  }
                 >
                   <Filter className="h-4 w-4 mr-2" />
                   Clear Filters
@@ -296,24 +327,36 @@ export function ApiExamples() {
               ) : opportunitiesData ? (
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Found {opportunitiesData.total} opportunities (Page {opportunitiesData.page} of {opportunitiesData.totalPages})
+                    Found {opportunitiesData.total} opportunities (Page{" "}
+                    {opportunitiesData.page} of {opportunitiesData.totalPages})
                   </p>
-                  
+
                   <div className="grid gap-4">
                     {opportunitiesData.opportunities.map((opportunity) => (
-                      <div key={opportunity.id} className="border rounded-lg p-4 space-y-2">
+                      <div
+                        key={opportunity.id}
+                        className="border rounded-lg p-4 space-y-2"
+                      >
                         <div className="flex justify-between items-start">
                           <div className="space-y-1">
-                            <h3 className="font-semibold">{opportunity.title}</h3>
-                            <p className="text-sm text-muted-foreground">{opportunity.company}</p>
+                            <h3 className="font-semibold">
+                              {opportunity.title}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {opportunity.company}
+                            </p>
                             <p className="text-sm">{opportunity.location}</p>
                           </div>
                           <div className="flex gap-2">
-                            <Badge variant="secondary">{opportunity.type}</Badge>
-                            <Badge variant="outline">{opportunity.category}</Badge>
+                            <Badge variant="secondary">
+                              {opportunity.type}
+                            </Badge>
+                            <Badge variant="outline">
+                              {opportunity.category}
+                            </Badge>
                           </div>
                         </div>
-                        
+
                         <div className="flex gap-2 pt-2">
                           <Button
                             size="sm"
@@ -326,16 +369,18 @@ export function ApiExamples() {
                               <>Apply</>
                             )}
                           </Button>
-                          
+
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleSaveOpportunity(opportunity.id)}
+                            onClick={() =>
+                              handleSaveOpportunity(opportunity.id)
+                            }
                             disabled={saveMutation.loading}
                           >
                             Save
                           </Button>
-                          
+
                           <Button size="sm" variant="ghost">
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -361,10 +406,19 @@ export function ApiExamples() {
               ) : featuredOpportunities ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {featuredOpportunities.map((opportunity) => (
-                    <div key={opportunity.id} className="border rounded-lg p-3 space-y-2">
-                      <h4 className="font-medium text-sm">{opportunity.title}</h4>
-                      <p className="text-xs text-muted-foreground">{opportunity.company}</p>
-                      <Badge variant="secondary" className="text-xs">{opportunity.category}</Badge>
+                    <div
+                      key={opportunity.id}
+                      className="border rounded-lg p-3 space-y-2"
+                    >
+                      <h4 className="font-medium text-sm">
+                        {opportunity.title}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        {opportunity.company}
+                      </p>
+                      <Badge variant="secondary" className="text-xs">
+                        {opportunity.category}
+                      </Badge>
                     </div>
                   ))}
                 </div>
@@ -393,17 +447,25 @@ export function ApiExamples() {
                         <div
                           key={notification.id}
                           className={`border rounded-lg p-3 space-y-2 ${
-                            notification.isRead ? 'opacity-60' : ''
+                            notification.isRead ? "opacity-60" : ""
                           }`}
                         >
                           <div className="flex justify-between items-start">
                             <div>
-                              <h4 className="font-medium text-sm">{notification.title}</h4>
-                              <p className="text-xs text-muted-foreground">{notification.message}</p>
+                              <h4 className="font-medium text-sm">
+                                {notification.title}
+                              </h4>
+                              <p className="text-xs text-muted-foreground">
+                                {notification.message}
+                              </p>
                             </div>
                             <div className="flex gap-2">
-                              <Badge 
-                                variant={notification.type === 'error' ? 'destructive' : 'secondary'}
+                              <Badge
+                                variant={
+                                  notification.type === "error"
+                                    ? "destructive"
+                                    : "secondary"
+                                }
                               >
                                 {notification.type}
                               </Badge>
@@ -411,7 +473,9 @@ export function ApiExamples() {
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => handleMarkNotificationRead(notification.id)}
+                                  onClick={() =>
+                                    handleMarkNotificationRead(notification.id)
+                                  }
                                   disabled={markReadMutation.loading}
                                 >
                                   Mark Read
@@ -439,12 +503,28 @@ export function ApiExamples() {
                   ) : systemSettings ? (
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="font-medium">Admin Users: {systemSettings.accessControl.adminUsers.length}</p>
-                        <p className="font-medium">Crawl Sources: {systemSettings.contentCrawling.sources.length}</p>
+                        <p className="font-medium">
+                          Admin Users:{" "}
+                          {systemSettings.accessControl.adminUsers.length}
+                        </p>
+                        <p className="font-medium">
+                          Crawl Sources:{" "}
+                          {systemSettings.contentCrawling.sources.length}
+                        </p>
                       </div>
                       <div>
-                        <p className="font-medium">Daily Reports: {systemSettings.notifications.dailyReports ? 'Enabled' : 'Disabled'}</p>
-                        <p className="font-medium">Email Notifications: {systemSettings.notifications.emailNotifications ? 'Enabled' : 'Disabled'}</p>
+                        <p className="font-medium">
+                          Daily Reports:{" "}
+                          {systemSettings.notifications.dailyReports
+                            ? "Enabled"
+                            : "Disabled"}
+                        </p>
+                        <p className="font-medium">
+                          Email Notifications:{" "}
+                          {systemSettings.notifications.emailNotifications
+                            ? "Enabled"
+                            : "Disabled"}
+                        </p>
                       </div>
                     </div>
                   ) : null}
@@ -454,7 +534,9 @@ export function ApiExamples() {
           ) : (
             <Card>
               <CardContent className="text-center p-8">
-                <p className="text-muted-foreground">Admin access required to view this section.</p>
+                <p className="text-muted-foreground">
+                  Admin access required to view this section.
+                </p>
               </CardContent>
             </Card>
           )}
@@ -468,9 +550,11 @@ export function ApiExamples() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <h4 className="font-semibold">Basic API Call with useApi Hook:</h4>
+                <h4 className="font-semibold">
+                  Basic API Call with useApi Hook:
+                </h4>
                 <pre className="bg-muted p-3 rounded text-sm overflow-auto">
-{`const { data, loading, error } = useApi(
+                  {`const { data, loading, error } = useApi(
   () => opportunityService.getOpportunities({
     search: 'developer',
     category: 'technology'
@@ -480,9 +564,11 @@ export function ApiExamples() {
               </div>
 
               <div className="space-y-2">
-                <h4 className="font-semibold">Mutation with useMutation Hook:</h4>
+                <h4 className="font-semibold">
+                  Mutation with useMutation Hook:
+                </h4>
                 <pre className="bg-muted p-3 rounded text-sm overflow-auto">
-{`const applyMutation = useMutation(
+                  {`const applyMutation = useMutation(
   opportunityService.applyToOpportunity
 );
 
@@ -500,7 +586,7 @@ const handleApply = async () => {
               <div className="space-y-2">
                 <h4 className="font-semibold">Authentication Context:</h4>
                 <pre className="bg-muted p-3 rounded text-sm overflow-auto">
-{`const { user, login, logout, isAuthenticated } = useAuth();
+                  {`const { user, login, logout, isAuthenticated } = useAuth();
 
 // Login
 await login({ email: 'user@example.com', password: 'password' });
@@ -515,7 +601,7 @@ if (isAuthenticated) {
               <div className="space-y-2">
                 <h4 className="font-semibold">Direct API Service Call:</h4>
                 <pre className="bg-muted p-3 rounded text-sm overflow-auto">
-{`// Direct service usage
+                  {`// Direct service usage
 const opportunities = await opportunityService.getOpportunities({
   search: 'react developer',
   type: 'full-time',

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import { useApi, useMutation } from "./useApi";
-import { useAuth } from "./useAuth";
+import { useApi, useMutation } from "./use-api";
+import { useAuth } from "./use-auth";
 import { opportunityService } from "@/services/opportunityService";
 import type {
   Opportunity,

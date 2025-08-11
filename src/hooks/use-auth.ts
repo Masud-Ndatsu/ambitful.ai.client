@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { authService } from "@/services/authService";
 import { User, LoginCredentials, RegisterData } from "@/types";
-import { useMutation } from "./useApi";
+import { useMutation } from "./use-api";
 import { useToast } from "./use-toast";
 
 interface AuthContextType {

@@ -42,7 +42,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import TextEditor from "../RichTextEditor";
-import { useAdminOpportunities } from "@/hooks/useAdminOpportunities";
+import { useAdminOpportunities } from "@/hooks/use-admin-opportunities";
 import { useToast } from "@/hooks/use-toast";
 
 const opportunities = [

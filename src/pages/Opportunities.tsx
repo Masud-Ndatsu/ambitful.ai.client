@@ -9,7 +9,7 @@ import { OpportunityCard } from "@/components/OpportunityCard";
 import { OpportunityDetailModal } from "@/components/OpportunityDetailModal";
 import { Button } from "@/components/ui/button";
 import { Grid, List } from "lucide-react";
-import { useOpportunities } from "@/hooks/useOpportunities";
+import { useOpportunities } from "@/hooks/use-opportunities";
 import type { Opportunity } from "@/types/opportunity";
 
 const Opportunities = () => {

@@ -49,7 +49,7 @@ import { AIDraftReview } from "@/components/admin/AIDraftReview";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { SystemSettings } from "@/components/admin/SystemSettings";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
 
 const sidebarItems = [
   { title: "Dashboard", icon: BarChart3, key: "dashboard" },
