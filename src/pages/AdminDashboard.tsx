@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -62,11 +62,11 @@ const sidebarItems = [
 
 function AdminSidebar({
   activeTab,
-  setActiveTab,
+  onNavigateToTab,
   onLogout,
 }: {
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  onNavigateToTab: (tab: string) => void;
   onLogout: () => void;
 }) {
   return (
@@ -81,7 +81,7 @@ function AdminSidebar({
               {sidebarItems.map((item) => (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
-                    onClick={() => setActiveTab(item.key)}
+                    onClick={() => onNavigateToTab(item.key)}
                     className={
                       activeTab === item.key
                         ? "bg-primary text-primary-foreground"
@@ -181,16 +181,37 @@ function AdminHeader({ user, onLogout }: { user: any; onLogout: () => void }) {
 }
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const { tab } = useParams<{ tab?: string }>();
+  const [activeTab, setActiveTab] = useState(tab || "dashboard");
   const { user, logout, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  // Check authentication and admin role
-  // useEffect(() => {
-  //   if (!isAuthenticated || !isAdmin) {
-  //     navigate("/");
-  //   }
-  // }, [isAuthenticated, isAdmin, navigate]);
+  // Update activeTab when URL parameter changes
+  useEffect(() => {
+    if (tab && tab !== activeTab) {
+      // Validate that the tab exists in our sidebar items
+      const validTabs = sidebarItems.map((item) => item.key);
+      if (validTabs.includes(tab)) {
+        setActiveTab(tab);
+      } else {
+        // If invalid tab, redirect to dashboard
+        navigate("/admin/dashboard", { replace: true });
+      }
+    } else if (!tab) {
+      // If no tab in URL, set dashboard as active and redirect to it  
+      setActiveTab("dashboard");
+      navigate("/admin/dashboard", { replace: true });
+    }
+  }, [tab, activeTab, navigate]);
+
+  // Navigate to a specific tab
+  const handleNavigateToTab = (tabKey: string) => {
+    if (tabKey === "dashboard") {
+      navigate("/admin/dashboard");
+    } else {
+      navigate(`/admin/${tabKey}`);
+    }
+  };
 
   // Custom logout function that navigates to home
   const handleLogout = async () => {
@@ -227,7 +248,7 @@ export default function AdminDashboard() {
       <div className="min-h-screen flex w-full bg-background">
         <AdminSidebar
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          onNavigateToTab={handleNavigateToTab}
           onLogout={handleLogout}
         />
         <div className="flex-1 flex flex-col">

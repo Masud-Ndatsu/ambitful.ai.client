@@ -24,7 +24,6 @@ export const DEFAULT_CATEGORIES = [
   "science",
 ];
 
-
 // Deadline filter options
 export const DEADLINE_OPTIONS = [
   { value: "next-7-days", label: "Next 7 days" },
@@ -36,9 +35,8 @@ export const DEADLINE_OPTIONS = [
 // Sort options for opportunities
 export const SORT_OPTIONS = [
   { value: "newest", label: "Newest first" },
-  { value: "oldest", label: "Oldest first" },
-  { value: "views", label: "Most popular" },
-  { value: "applications", label: "Most applied" },
+  { value: "deadline", label: "Oldest first" },
+  { value: "relevance", label: "Most popular" },
 ];
 
 // Readable labels for types (for display purposes)
