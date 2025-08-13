@@ -1,7 +1,7 @@
 // Export all data files
 export * from "./countries";
+export * from "./opportunityFilters";
 
 // You can add other data exports here as needed
-// export * from './categories';
 // export * from './industries';
 // etc.
