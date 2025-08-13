@@ -22,7 +22,6 @@ import type { OpportunityFilters as OpportunityFiltersType } from "@/types/oppor
 
 interface SelectedFilters {
   categories: string[];
-  locations: string[];
   types: string[];
   deadlines: string;
   dateRange?: DateRange;
@@ -31,7 +30,6 @@ interface SelectedFilters {
 
 interface AvailableFilters {
   categories: string[];
-  locations: string[];
   types: string[];
   tags: string[];
 }
@@ -46,7 +44,6 @@ interface OpportunityFiltersProps {
 import {
   DEFAULT_TYPES,
   DEFAULT_CATEGORIES,
-  DEFAULT_LOCATIONS,
   DEADLINE_OPTIONS,
   SORT_OPTIONS,
   TYPE_LABELS,
@@ -70,10 +67,6 @@ export const OpportunityFilters = ({
         availableFilters.categories.length > 0
           ? availableFilters.categories
           : DEFAULT_CATEGORIES,
-      locations:
-        availableFilters.locations.length > 0
-          ? availableFilters.locations
-          : DEFAULT_LOCATIONS,
       types:
         availableFilters.types.length > 0
           ? availableFilters.types
@@ -85,31 +78,35 @@ export const OpportunityFilters = ({
   // Optimized change handlers using useCallback
   const handleMultiSelectChange = useCallback(
     (
-      filterType: "categories" | "locations" | "types",
+      filterType: "categories" | "types",
       value: string,
       checked: boolean
     ) => {
       // Map plural filter types to singular OpportunityFilters properties
       const filterMapping = {
-        categories: 'category',
-        locations: 'location', 
-        types: 'type'
+        categories: "category",
+        types: "type",
       } as const;
 
       const propertyName = filterMapping[filterType];
-      
+
       // Get current selected value for this filter type
-      const currentValue = filterType === 'categories' ? selectedFilters.categories?.[0] :
-                         filterType === 'locations' ? selectedFilters.locations?.[0] :
-                         selectedFilters.types?.[0];
-      
+      const currentValue =
+        filterType === "categories"
+          ? selectedFilters.categories?.[0]
+          : selectedFilters.types?.[0];
+
       if (checked) {
         // Set the new filter value
-        onFiltersChange({ [propertyName]: value } as Partial<OpportunityFiltersType>);
+        onFiltersChange({
+          [propertyName]: value,
+        } as Partial<OpportunityFiltersType>);
       } else {
         // Clear the filter if unchecking the currently selected value
         if (currentValue === value) {
-          onFiltersChange({ [propertyName]: "" } as Partial<OpportunityFiltersType>);
+          onFiltersChange({
+            [propertyName]: "",
+          } as Partial<OpportunityFiltersType>);
         }
       }
     },
@@ -141,7 +138,6 @@ export const OpportunityFilters = ({
   const clearAllFilters = useCallback(() => {
     onFiltersChange({
       category: "",
-      location: "", 
       type: "",
       sortBy: "newest",
       search: "",
@@ -153,7 +149,6 @@ export const OpportunityFilters = ({
   const hasActiveFilters = useMemo(
     () =>
       Boolean(selectedFilters.categories?.[0]) ||
-      Boolean(selectedFilters.locations?.[0]) ||
       Boolean(selectedFilters.types?.[0]) ||
       Boolean(selectedFilters.deadlines) ||
       Boolean(dateRange?.from || dateRange?.to),
@@ -258,38 +253,8 @@ export const OpportunityFilters = ({
                   htmlFor={`category-${category}`}
                   className="text-sm text-foreground cursor-pointer"
                 >
-                  {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS] || category}
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Location */}
-        <div>
-          <label className="text-sm font-medium text-foreground mb-3 block">
-            Location
-          </label>
-          <div className="space-y-2">
-            {filterOptions.locations.map((location) => (
-              <div key={location} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`location-${location}`}
-                  checked={selectedFilters.locations?.[0] === location}
-                  onCheckedChange={(checked) =>
-                    handleMultiSelectChange(
-                      "locations",
-                      location,
-                      checked as boolean
-                    )
-                  }
-                  disabled={loading}
-                />
-                <label
-                  htmlFor={`location-${location}`}
-                  className="text-sm text-foreground cursor-pointer"
-                >
-                  {location}
+                  {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS] ||
+                    category}
                 </label>
               </div>
             ))}
