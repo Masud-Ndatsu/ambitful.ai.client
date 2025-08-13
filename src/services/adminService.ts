@@ -320,6 +320,174 @@ export class AdminService {
       `/admin/opportunities/${id}/analytics`
     );
   }
+
+  // Dashboard specific endpoints
+  async getDashboardSummary(): Promise<{
+    overview: {
+      totalUsers: number;
+      activeUsers: number;
+      activeOpportunities: number;
+      totalApplications: number;
+      avgCTR: number;
+    };
+    topPerformingOpportunities: Array<{
+      id: string;
+      title: string;
+      views: number;
+      applications: number;
+      ctr: number;
+    }>;
+    userGrowth: {
+      totalUsers: number;
+      newUsersThisWeek: number;
+      growthRate: number;
+    };
+    systemHealth: {
+      uptime: string;
+      responseTime: string;
+      errorRate: number;
+    };
+  }> {
+    return await apiService.get<{
+      overview: {
+        totalUsers: number;
+        activeUsers: number;
+        activeOpportunities: number;
+        totalApplications: number;
+        avgCTR: number;
+      };
+      topPerformingOpportunities: Array<{
+        id: string;
+        title: string;
+        views: number;
+        applications: number;
+        ctr: number;
+      }>;
+      userGrowth: {
+        totalUsers: number;
+        newUsersThisWeek: number;
+        growthRate: number;
+      };
+      systemHealth: {
+        uptime: string;
+        responseTime: string;
+        errorRate: number;
+      };
+    }>("/admin/analytics/dashboard");
+  }
+
+  async getAIDraftStats(): Promise<{
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+    byPriority: { high: number; medium: number; low: number };
+  }> {
+    return await apiService.get<{
+      total: number;
+      pending: number;
+      approved: number;
+      rejected: number;
+      byPriority: { high: number; medium: number; low: number };
+    }>("/admin/ai-drafts-stats");
+  }
+
+  async getDetailedMetrics(period: "7d" | "30d" | "90d" = "30d"): Promise<{
+    overview: {
+      visitTrend: Array<{ name: string; visits: number; date?: string }>;
+      topRegions: Array<{
+        country: string;
+        visits: number;
+        percentage: number;
+      }>;
+    };
+    opportunityPerformance: Array<{
+      id: string;
+      title: string;
+      views: number;
+      ctr: number;
+      timeOnPage: string;
+    }>;
+    recentActivity: Array<{
+      id: string;
+      type: string;
+      description: string;
+      timestamp: string;
+    }>;
+  }> {
+    return await apiService.get<{
+      overview: {
+        visitTrend: Array<{ name: string; visits: number; date?: string }>;
+        topRegions: Array<{
+          country: string;
+          visits: number;
+          percentage: number;
+        }>;
+      };
+      topRegions: Array<{
+        country: string;
+        visits: number;
+        percentage: number;
+      }>;
+      opportunityPerformance: Array<{
+        id: string;
+        title: string;
+        views: number;
+        ctr: number;
+        timeOnPage: string;
+      }>;
+      recentActivity: Array<{
+        id: string;
+        type: string;
+        description: string;
+        timestamp: string;
+      }>;
+    }>(`/admin/analytics/detailed?period=${period}`);
+  }
+
+  async getAIDrafts(
+    filters: {
+      page?: number;
+      limit?: number;
+      status?: "pending" | "approved" | "rejected";
+      priority?: "high" | "medium" | "low";
+    } = {}
+  ): Promise<{
+    drafts: Array<{
+      id: string;
+      title: string;
+      source: string;
+      status: "pending" | "approved" | "rejected";
+      priority: "high" | "medium" | "low";
+      createdAt: string;
+    }>;
+    total: number;
+    pending: number;
+    page: number;
+    totalPages: number;
+  }> {
+    const queryParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value.toString());
+      }
+    });
+
+    return await apiService.get<{
+      drafts: Array<{
+        id: string;
+        title: string;
+        source: string;
+        status: "pending" | "approved" | "rejected";
+        priority: "high" | "medium" | "low";
+        createdAt: string;
+      }>;
+      total: number;
+      pending: number;
+      page: number;
+      totalPages: number;
+    }>(`/admin/ai-drafts?${queryParams.toString()}`);
+  }
 }
 
 export const adminService = new AdminService();

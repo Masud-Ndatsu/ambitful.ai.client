@@ -24,17 +24,6 @@ export const DEFAULT_CATEGORIES = [
   "science",
 ];
 
-// Default locations for filters
-export const DEFAULT_LOCATIONS = [
-  "Remote",
-  "United States",
-  "United Kingdom",
-  "Canada",
-  "Australia",
-  "Germany",
-  "Netherlands",
-  "Global",
-];
 
 // Deadline filter options
 export const DEADLINE_OPTIONS = [
