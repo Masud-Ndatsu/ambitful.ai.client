@@ -103,7 +103,7 @@ export const OpportunityDetailModal = ({
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto bg-gradient-card">
+      <DialogContent className="max-w-7xl max-h-[95vh] overflow-y-auto bg-gradient-card px-8">
         <DialogHeader className="pb-4">
           <div className="flex items-start justify-between">
             <div className="flex-grow">

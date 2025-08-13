@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, ExternalLink, DollarSign } from "lucide-react";
 import type { Opportunity } from "@/types/opportunity";
+import { formatDate } from "@/lib/utils";
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -120,7 +121,9 @@ export const OpportunityCard = ({
         <div className="space-y-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            <span>Deadline: {opportunity.deadline}</span>
+            <span>
+              Deadline: {formatDate(opportunity.deadline, { format: "short" })}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />

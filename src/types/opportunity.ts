@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
+import type { DEFAULT_TYPES, DEFAULT_CATEGORIES } from "@/data/opportunityFilters";
+
 export interface Opportunity {
   id: string;
   title: string;
   description: string;
   fullDescription?: string;
-  type: "scholarship" | "internship" | "fellowship" | "grant";
-  category: string;
+  type: typeof DEFAULT_TYPES[number];
+  category: typeof DEFAULT_CATEGORIES[number] | string;
   location: string;
   deadline: string;
   amount: string | null;
@@ -20,7 +22,7 @@ export interface Opportunity {
   applicationInstructions?: string[];
   eligibility?: string[];
   benefits?: string[];
-  // Legacy fields for backward compatibility  
+  // Legacy fields for backward compatibility
   company?: string;
   salary?: {
     min: number;
@@ -37,6 +39,8 @@ export interface Opportunity {
 }
 
 export interface OpportunityFilters {
+  dateFrom?: string;
+  dateTo?: string;
   search?: string;
   category?: string;
   location?: string;
@@ -79,8 +83,8 @@ export interface CreateOpportunityData {
     max: number;
     currency: string;
   };
-  type: Opportunity["type"];
-  category: string;
+  type: typeof DEFAULT_TYPES[number];
+  category: typeof DEFAULT_CATEGORIES[number] | string;
   tags: string[];
   requirements: string[];
   benefits: string[];

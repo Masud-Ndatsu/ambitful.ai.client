@@ -35,6 +35,48 @@ class ApiService {
     localStorage.removeItem("auth_token");
   }
 
+  // JWT token utilities
+  private decodeToken(token: string): any {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('Failed to decode token:', error);
+      return null;
+    }
+  }
+
+  isTokenExpired(): boolean {
+    const token = this.getAuthToken();
+    if (!token) return true;
+
+    const decoded = this.decodeToken(token);
+    if (!decoded || !decoded.exp) return true;
+
+    // Convert exp from seconds to milliseconds and compare with current time
+    const expirationTime = decoded.exp * 1000;
+    const currentTime = Date.now();
+    
+    return currentTime >= expirationTime;
+  }
+
+  getTokenExpiration(): Date | null {
+    const token = this.getAuthToken();
+    if (!token) return null;
+
+    const decoded = this.decodeToken(token);
+    if (!decoded || !decoded.exp) return null;
+
+    return new Date(decoded.exp * 1000);
+  }
+
   getBaseURL(): string {
     return this.baseURL;
   }
@@ -62,6 +104,13 @@ class ApiService {
       console.log({ response: data });
 
       if (!response.ok) {
+        // Handle token expiration
+        if (response.status === 401) {
+          this.clearAuthToken();
+          // Optionally trigger a global auth state update
+          window.dispatchEvent(new CustomEvent('auth:token-expired'));
+        }
+        
         throw {
           message: data?.error?.message || "Request failed",
           status: response.status,

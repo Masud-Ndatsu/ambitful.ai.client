@@ -16,121 +16,151 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon, Filter, X } from "lucide-react";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type { DateRange } from "react-day-picker";
+import type { OpportunityFilters as OpportunityFiltersType } from "@/types/opportunity";
 
-interface Filters {
+interface SelectedFilters {
   categories: string[];
   locations: string[];
   types: string[];
   deadlines: string;
+  dateRange?: DateRange;
   sortBy: string;
 }
 
-interface OpportunityFiltersProps {
-  filters: Filters;
-  onFiltersChange: (filters: Filters) => void;
+interface AvailableFilters {
+  categories: string[];
+  locations: string[];
+  types: string[];
+  tags: string[];
 }
 
-const categories = [
-  "Technology",
-  "Healthcare",
-  "Education",
-  "Business",
-  "Arts & Culture",
-  "Environment",
-  "Social Impact",
-  "Research",
-];
+interface OpportunityFiltersProps {
+  selectedFilters: SelectedFilters;
+  availableFilters: AvailableFilters;
+  onFiltersChange: (filters: Partial<OpportunityFiltersType>) => void;
+  loading?: boolean;
+}
 
-const locations = [
-  "Remote",
-  "United States",
-  "United Kingdom",
-  "Canada",
-  "Australia",
-  "Germany",
-  "Netherlands",
-  "Global",
-];
-
-const types = [
-  "Scholarship",
-  "Internship",
-  "Fellowship",
-  "Grant",
-  "Competition",
-];
-
-const deadlineOptions = [
-  { value: "next-7-days", label: "Next 7 days" },
-  { value: "this-month", label: "This month" },
-  { value: "next-3-months", label: "Next 3 months" },
-  { value: "custom", label: "Custom range" },
-];
-
-const sortOptions = [
-  { value: "newest", label: "Newest first" },
-  { value: "deadline-soon", label: "Deadline approaching" },
-  { value: "popular", label: "Most popular" },
-  { value: "amount-high", label: "Highest amount" },
-];
+import {
+  DEFAULT_TYPES,
+  DEFAULT_CATEGORIES,
+  DEFAULT_LOCATIONS,
+  DEADLINE_OPTIONS,
+  SORT_OPTIONS,
+  TYPE_LABELS,
+  CATEGORY_LABELS,
+} from "@/data";
 
 export const OpportunityFilters = ({
-  filters,
+  selectedFilters,
+  availableFilters,
   onFiltersChange,
+  loading = false,
 }: OpportunityFiltersProps) => {
-  const [showCustomDate, setShowCustomDate] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(
+    selectedFilters.dateRange
+  );
 
-  console.log({ filters });
+  // Memoized filter options - use available filters when provided, fallback to defaults
+  const filterOptions = useMemo(
+    () => ({
+      categories:
+        availableFilters.categories.length > 0
+          ? availableFilters.categories
+          : DEFAULT_CATEGORIES,
+      locations:
+        availableFilters.locations.length > 0
+          ? availableFilters.locations
+          : DEFAULT_LOCATIONS,
+      types:
+        availableFilters.types.length > 0
+          ? availableFilters.types
+          : DEFAULT_TYPES,
+    }),
+    [availableFilters]
+  );
 
-  const handleCategoryChange = (category: string, checked: boolean) => {
-    const newCategories = checked
-      ? [...filters.categories, category]
-      : filters.categories.filter((c) => c !== category);
+  // Optimized change handlers using useCallback
+  const handleMultiSelectChange = useCallback(
+    (
+      filterType: "categories" | "locations" | "types",
+      value: string,
+      checked: boolean
+    ) => {
+      // Map plural filter types to singular OpportunityFilters properties
+      const filterMapping = {
+        categories: 'category',
+        locations: 'location', 
+        types: 'type'
+      } as const;
 
-    onFiltersChange({ ...filters, categories: newCategories });
-  };
+      const propertyName = filterMapping[filterType];
+      
+      // Get current selected value for this filter type
+      const currentValue = filterType === 'categories' ? selectedFilters.categories?.[0] :
+                         filterType === 'locations' ? selectedFilters.locations?.[0] :
+                         selectedFilters.types?.[0];
+      
+      if (checked) {
+        // Set the new filter value
+        onFiltersChange({ [propertyName]: value } as Partial<OpportunityFiltersType>);
+      } else {
+        // Clear the filter if unchecking the currently selected value
+        if (currentValue === value) {
+          onFiltersChange({ [propertyName]: "" } as Partial<OpportunityFiltersType>);
+        }
+      }
+    },
+    [selectedFilters, onFiltersChange]
+  );
 
-  const handleTypeChange = (type: string, checked: boolean) => {
-    const newTypes = checked
-      ? [...filters.types, type]
-      : filters.types.filter((t) => t !== type);
+  const handleSingleSelectChange = useCallback(
+    (filterType: string, value: string) => {
+      onFiltersChange({
+        [filterType]: value,
+      } as Partial<OpportunityFiltersType>);
+    },
+    [onFiltersChange]
+  );
 
-    onFiltersChange({ ...filters, types: newTypes });
-  };
+  const handleDateRangeChange = useCallback(
+    (range: DateRange | undefined) => {
+      setDateRange(range);
+      if (range?.from && range?.to) {
+        onFiltersChange({
+          dateFrom: range.from.toISOString(),
+          dateTo: range.to.toISOString(),
+        });
+      }
+    },
+    [onFiltersChange]
+  );
 
-  const handleLocationChange = (location: string, checked: boolean) => {
-    const newLocations = checked
-      ? [...filters.locations, location]
-      : filters.locations.filter((l) => l !== location);
-
-    onFiltersChange({ ...filters, locations: newLocations });
-  };
-
-  const handleDeadlineChange = (value: string) => {
-    onFiltersChange({ ...filters, deadlines: value });
-    setShowCustomDate(value === "custom");
-  };
-
-  const clearAllFilters = () => {
+  const clearAllFilters = useCallback(() => {
     onFiltersChange({
-      categories: [],
-      locations: [],
-      types: [],
-      deadlines: "",
+      category: "",
+      location: "", 
+      type: "",
       sortBy: "newest",
+      search: "",
     });
-    setShowCustomDate(false);
     setDateRange(undefined);
-  };
+  }, [onFiltersChange]);
 
-  const hasActiveFilters =
-    filters.categories.length > 0 ||
-    filters.locations.length > 0 ||
-    filters.types.length > 0 ||
-    filters.deadlines;
+  // Check if any filters are active
+  const hasActiveFilters = useMemo(
+    () =>
+      Boolean(selectedFilters.categories?.[0]) ||
+      Boolean(selectedFilters.locations?.[0]) ||
+      Boolean(selectedFilters.types?.[0]) ||
+      Boolean(selectedFilters.deadlines) ||
+      Boolean(dateRange?.from || dateRange?.to),
+    [selectedFilters, dateRange]
+  );
+
+  const showCustomDate = selectedFilters.deadlines === "custom";
 
   return (
     <Card className="p-6 bg-gradient-card border-0 shadow-soft">
@@ -160,16 +190,15 @@ export const OpportunityFilters = ({
             Sort by
           </label>
           <Select
-            value={filters.sortBy}
-            onValueChange={(value) =>
-              onFiltersChange({ ...filters, sortBy: value })
-            }
+            value={selectedFilters.sortBy}
+            onValueChange={(value) => handleSingleSelectChange("sortBy", value)}
+            disabled={loading}
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {sortOptions.map((option) => (
+              {SORT_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -184,20 +213,21 @@ export const OpportunityFilters = ({
             Opportunity Type
           </label>
           <div className="space-y-2">
-            {types.map((type) => (
+            {filterOptions.types.map((type) => (
               <div key={type} className="flex items-center space-x-2">
                 <Checkbox
                   id={`type-${type}`}
-                  checked={filters.types.includes(type)}
+                  checked={selectedFilters.types?.[0] === type}
                   onCheckedChange={(checked) =>
-                    handleTypeChange(type, checked as boolean)
+                    handleMultiSelectChange("types", type, checked as boolean)
                   }
+                  disabled={loading}
                 />
                 <label
                   htmlFor={`type-${type}`}
                   className="text-sm text-foreground cursor-pointer"
                 >
-                  {type}
+                  {TYPE_LABELS[type as keyof typeof TYPE_LABELS] || type}
                 </label>
               </div>
             ))}
@@ -210,20 +240,25 @@ export const OpportunityFilters = ({
             Category
           </label>
           <div className="space-y-2 max-h-48 overflow-y-auto">
-            {categories.map((category) => (
+            {filterOptions.categories.map((category) => (
               <div key={category} className="flex items-center space-x-2">
                 <Checkbox
                   id={`category-${category}`}
-                  checked={filters.categories.includes(category)}
+                  checked={selectedFilters.categories?.[0] === category}
                   onCheckedChange={(checked) =>
-                    handleCategoryChange(category, checked as boolean)
+                    handleMultiSelectChange(
+                      "categories",
+                      category,
+                      checked as boolean
+                    )
                   }
+                  disabled={loading}
                 />
                 <label
                   htmlFor={`category-${category}`}
                   className="text-sm text-foreground cursor-pointer"
                 >
-                  {category}
+                  {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS] || category}
                 </label>
               </div>
             ))}
@@ -236,14 +271,19 @@ export const OpportunityFilters = ({
             Location
           </label>
           <div className="space-y-2">
-            {locations.map((location) => (
+            {filterOptions.locations.map((location) => (
               <div key={location} className="flex items-center space-x-2">
                 <Checkbox
                   id={`location-${location}`}
-                  checked={filters.locations.includes(location)}
+                  checked={selectedFilters.locations?.[0] === location}
                   onCheckedChange={(checked) =>
-                    handleLocationChange(location, checked as boolean)
+                    handleMultiSelectChange(
+                      "locations",
+                      location,
+                      checked as boolean
+                    )
                   }
+                  disabled={loading}
                 />
                 <label
                   htmlFor={`location-${location}`}
@@ -262,14 +302,17 @@ export const OpportunityFilters = ({
             Deadline
           </label>
           <Select
-            value={filters.deadlines}
-            onValueChange={handleDeadlineChange}
+            value={selectedFilters.deadlines}
+            onValueChange={(value) =>
+              handleSingleSelectChange("deadlines", value)
+            }
+            disabled={loading}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select deadline filter" />
             </SelectTrigger>
             <SelectContent>
-              {deadlineOptions.map((option) => (
+              {DEADLINE_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -284,6 +327,7 @@ export const OpportunityFilters = ({
                   <Button
                     variant="outline"
                     className="w-full justify-start text-left"
+                    disabled={loading}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {dateRange?.from && dateRange?.to
@@ -298,9 +342,10 @@ export const OpportunityFilters = ({
                   <Calendar
                     mode="range"
                     selected={dateRange}
-                    onSelect={setDateRange}
+                    onSelect={handleDateRangeChange}
                     numberOfMonths={2}
                     className="pointer-events-auto"
+                    disabled={loading}
                   />
                 </PopoverContent>
               </Popover>

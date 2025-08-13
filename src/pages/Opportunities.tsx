@@ -35,6 +35,8 @@ const Opportunities = () => {
     getOpportunityById,
   } = useOpportunities();
 
+  console.log({ filters, availableFilters });
+
   // Get the selected opportunity from URL parameter
   const selectedOpportunityId = searchParams.get("opportunity");
   const [selectedOpportunity, setSelectedOpportunity] =
@@ -75,17 +77,23 @@ const Opportunities = () => {
   };
 
   // Handle filter changes
-  const handleFiltersChange = (newFilters: any) => {
-    if (newFilters.categories?.length) {
-      setCategory(newFilters.categories[0]);
+  const handleFiltersChange = (
+    newFilters: Partial<import("@/types/opportunity").OpportunityFilters>
+  ) => {
+    // Handle each filter type, including clearing (undefined values)
+    if (newFilters.search !== undefined) {
+      setSearch(newFilters.search || "");
     }
-    if (newFilters.locations?.length) {
-      setLocation(newFilters.locations[0]);
+    if (newFilters.category !== undefined) {
+      setCategory(newFilters.category || "");
     }
-    if (newFilters.types?.length) {
-      setType(newFilters.types[0]);
+    if (newFilters.location !== undefined) {
+      setLocation(newFilters.location || "");
     }
-    if (newFilters.sortBy) {
+    if (newFilters.type !== undefined) {
+      setType(newFilters.type || "");
+    }
+    if (newFilters.sortBy !== undefined) {
       setSortBy(newFilters.sortBy);
     }
   };
@@ -122,14 +130,16 @@ const Opportunities = () => {
               {/* Filters Sidebar */}
               <div className="lg:w-1/4">
                 <OpportunityFilters
-                  filters={{
+                  selectedFilters={{
                     categories: filters.category ? [filters.category] : [],
                     locations: filters.location ? [filters.location] : [],
                     types: filters.type ? [filters.type] : [],
                     deadlines: "",
                     sortBy: filters.sortBy || "newest",
                   }}
+                  availableFilters={availableFilters}
                   onFiltersChange={handleFiltersChange}
+                  loading={loading}
                 />
               </div>
 

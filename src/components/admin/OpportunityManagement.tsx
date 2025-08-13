@@ -44,6 +44,13 @@ import { Textarea } from "@/components/ui/textarea";
 import TextEditor from "../RichTextEditor";
 import { useAdminOpportunities } from "@/hooks/use-admin-opportunities";
 import { useToast } from "@/hooks/use-toast";
+import {
+  DEFAULT_TYPES,
+  TYPE_LABELS,
+  DEFAULT_CATEGORIES,
+  CATEGORY_LABELS,
+} from "@/data";
+import { formatDate } from "@/lib/utils";
 
 const opportunities = [
   {
@@ -105,24 +112,18 @@ export function OpportunityManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   // Form state based on createOpportunitySchema
   const [title, setTitle] = useState("");
-  const [type, setType] = useState<
-    "scholarship" | "internship" | "fellowship" | "grant"
-  >("scholarship");
+  const [type, setType] = useState<(typeof DEFAULT_TYPES)[number]>(
+    DEFAULT_TYPES[0] as (typeof DEFAULT_TYPES)[number]
+  );
   const [description, setDescription] = useState("");
   const [fullDescription, setFullDescription] = useState("");
   const [deadline, setDeadline] = useState("");
   const [location, setLocation] = useState("");
-  // const [amount, setAmount] = useState("");
   const [link, setLink] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<
+    (typeof DEFAULT_CATEGORIES)[number] | ""
+  >("");
   const [status, setStatus] = useState<"published" | "draft">("draft");
-  // const [applicationInstructions, setApplicationInstructions] = useState("");
-
-  // Array fields state
-  // const [eligibility, setEligibility] = useState<string[]>([]);
-  // const [eligibilityInput, setEligibilityInput] = useState("");
-  // const [benefits, setBenefits] = useState<string[]>([]);
-  // const [benefitInput, setBenefitInput] = useState("");
 
   // Admin hooks
   const {
@@ -170,51 +171,17 @@ export function OpportunityManagement() {
     }
   };
 
-  // // Helper functions for array fields
-  // const addEligibility = () => {
-  //   if (
-  //     eligibilityInput.trim() &&
-  //     !eligibility.includes(eligibilityInput.trim())
-  //   ) {
-  //     setEligibility([...eligibility, eligibilityInput.trim()]);
-  //     setEligibilityInput("");
-  //   }
-  // };
-
-  // const removeEligibility = (itemToRemove: string) => {
-  //   setEligibility(eligibility.filter((item) => item !== itemToRemove));
-  // };
-
-  // const addBenefit = () => {
-  //   if (benefitInput.trim() && !benefits.includes(benefitInput.trim())) {
-  //     setBenefits([...benefits, benefitInput.trim()]);
-  //     setBenefitInput("");
-  //   }
-  // };
-
-  // const removeBenefit = (benefitToRemove: string) => {
-  //   setBenefits(benefits.filter((benefit) => benefit !== benefitToRemove));
-  // };
-
-  // _.map(o => o.)
-
   // Reset form state
   const resetForm = () => {
     setTitle("");
-    setType("scholarship");
+    setType(DEFAULT_TYPES[0] as (typeof DEFAULT_TYPES)[number]);
     setDescription("");
     setFullDescription("");
     setDeadline("");
     setLocation("");
-    // setAmount("");
     setLink("");
     setCategory("");
     setStatus("draft");
-    // setApplicationInstructions("");
-    // setEligibility([]);
-    // setEligibilityInput("");
-    // setBenefits([]);
-    // setBenefitInput("");
   };
 
   const handleCreateOpportunity = async () => {
@@ -371,34 +338,46 @@ export function OpportunityManagement() {
                   <Label htmlFor="type">Type</Label>
                   <Select
                     value={type}
-                    onValueChange={(
-                      value:
-                        | "scholarship"
-                        | "internship"
-                        | "fellowship"
-                        | "grant"
-                    ) => setType(value)}
+                    onValueChange={(value: (typeof DEFAULT_TYPES)[number]) =>
+                      setType(value)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="scholarship">Scholarship</SelectItem>
-                      <SelectItem value="internship">Internship</SelectItem>
-                      <SelectItem value="fellowship">Fellowship</SelectItem>
-                      <SelectItem value="grant">Grant</SelectItem>
+                      {DEFAULT_TYPES.map((typeOption) => (
+                        <SelectItem key={typeOption} value={typeOption}>
+                          {TYPE_LABELS[
+                            typeOption as keyof typeof TYPE_LABELS
+                          ] || typeOption}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Input
-                  id="category"
-                  placeholder="Enter category"
+                <Select
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                />
+                  onValueChange={(value: (typeof DEFAULT_CATEGORIES)[number]) =>
+                    setCategory(value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEFAULT_CATEGORIES.map((categoryOption) => (
+                      <SelectItem key={categoryOption} value={categoryOption}>
+                        {CATEGORY_LABELS[
+                          categoryOption as keyof typeof CATEGORY_LABELS
+                        ] || categoryOption}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="description">Description</Label>
@@ -598,7 +577,6 @@ export function OpportunityManagement() {
                 <TableHead>Category</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Date Added</TableHead>
-                <TableHead>Author</TableHead>
                 <TableHead className="text-right">Views</TableHead>
                 <TableHead className="text-right">Applications</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -624,8 +602,9 @@ export function OpportunityManagement() {
                       {opportunity.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{opportunity.createdAt}</TableCell>
-                  <TableCell>{opportunity.createdAt}</TableCell>
+                  <TableCell>
+                    {formatDate(opportunity.createdAt, { format: "short" })}
+                  </TableCell>
                   <TableCell className="text-right">
                     {opportunity.views}
                   </TableCell>

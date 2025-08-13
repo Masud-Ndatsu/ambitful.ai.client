@@ -65,6 +65,15 @@ export class AuthService {
       newPassword,
     });
   }
+
+  // Token expiration utilities
+  isTokenExpired(): boolean {
+    return apiService.isTokenExpired();
+  }
+
+  getTokenExpiration(): Date | null {
+    return apiService.getTokenExpiration();
+  }
 }
 
 export const authService = new AuthService();
