@@ -21,7 +21,7 @@ const Footer = () => {
           <div className="lg:col-span-1">
             <div className="flex items-center mb-4">
               <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                OpportunityAI
+                AmbifulAI
               </span>
             </div>
             <p className="text-muted mb-6 leading-relaxed">
