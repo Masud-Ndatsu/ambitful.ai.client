@@ -1,9 +1,12 @@
-import type { DEFAULT_TYPES, DEFAULT_CATEGORIES } from "@/data/opportunityFilters";
+import type {
+  DEFAULT_TYPES,
+  DEFAULT_CATEGORIES,
+} from "@/data/opportunityFilters";
 
 export interface AdminOpportunity {
   id: string;
   title: string;
-  type: typeof DEFAULT_TYPES[number];
+  type: (typeof DEFAULT_TYPES)[number];
   description: string;
   fullDescription: string;
   deadline: string;
@@ -13,7 +16,7 @@ export interface AdminOpportunity {
   eligibility: string[];
   benefits: string[];
   applicationInstructions: string;
-  category: typeof DEFAULT_CATEGORIES[number];
+  category: (typeof DEFAULT_CATEGORIES)[number];
   status: "published" | "draft" | "archived";
   createdAt: string;
   updatedAt: string;
@@ -50,7 +53,7 @@ export interface AdminOpportunityFilters {
 
 export interface CreateOpportunityData {
   title: string;
-  type: typeof DEFAULT_TYPES[number];
+  type: (typeof DEFAULT_TYPES)[number];
   description: string;
   fullDescription: string;
   deadline: string;
@@ -60,13 +63,13 @@ export interface CreateOpportunityData {
   eligibility?: string[];
   benefits?: string[];
   applicationInstructions?: string;
-  category: typeof DEFAULT_CATEGORIES[number] | string;
+  category: (typeof DEFAULT_CATEGORIES)[number] | string;
   status?: "published" | "draft";
 }
 
 export interface UpdateOpportunityData {
   title?: string;
-  type?: typeof DEFAULT_TYPES[number];
+  type?: (typeof DEFAULT_TYPES)[number];
   description?: string;
   fullDescription?: string;
   deadline?: string;
@@ -76,7 +79,7 @@ export interface UpdateOpportunityData {
   eligibility?: string[];
   benefits?: string[];
   applicationInstructions?: string;
-  category?: typeof DEFAULT_CATEGORIES[number] | string;
+  category?: (typeof DEFAULT_CATEGORIES)[number] | string;
   status?: "published" | "draft" | "archived";
 }
 

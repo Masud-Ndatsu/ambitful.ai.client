@@ -396,7 +396,7 @@ export function UserManagement() {
                     </TableCell>
                     <TableCell>{user.country || "N/A"}</TableCell>
                     <TableCell>
-                      <Badge variant={getStatusColor(user.status) as any}>
+                      <Badge variant={getStatusColor(user.status) as never}>
                         {user.status}
                       </Badge>
                     </TableCell>

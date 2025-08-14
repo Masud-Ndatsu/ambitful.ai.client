@@ -1,4 +1,5 @@
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +20,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Edit, Trash2, Eye, Filter, Download } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Filter,
+  Download,
+  RefreshCw,
+  AlertCircle,
+  Search,
+  X,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -51,6 +63,8 @@ import {
   CATEGORY_LABELS,
 } from "@/data";
 import { formatDate } from "@/lib/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const opportunities = [
   {
@@ -109,7 +123,8 @@ export function OpportunityManagement() {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 300);
   // Form state based on createOpportunitySchema
   const [title, setTitle] = useState("");
   const [type, setType] = useState<(typeof DEFAULT_TYPES)[number]>(
@@ -127,14 +142,40 @@ export function OpportunityManagement() {
 
   // Admin hooks
   const {
-    createOpportunity,
-    opportunities: _opp,
-    bulkAction,
+    opportunities: adminOpportunities,
+    loading,
+    error,
+    creating,
     bulkActioning,
+    createOpportunity,
+    bulkAction,
+    refetch,
+    stats,
+    total,
+    setSearch,
+    setStatus: setApiStatus,
+    setCategory: setApiCategory,
   } = useAdminOpportunities();
   const { toast } = useToast();
 
-  console.log({ _opp });
+  // Update API filters when debounced search changes
+  useEffect(() => {
+    setSearch(debouncedSearch === "" ? undefined : debouncedSearch);
+  }, [debouncedSearch, setSearch]);
+
+  // Handle status filter changes
+  useEffect(() => {
+    setApiStatus(statusFilter === "all" ? undefined : statusFilter);
+  }, [statusFilter, setApiStatus]);
+
+  // Handle category filter changes
+  useEffect(() => {
+    setApiCategory(categoryFilter === "all" ? undefined : categoryFilter);
+  }, [categoryFilter, setApiCategory]);
+
+  // Use real opportunities data if available, fallback to mock data
+  const displayOpportunities =
+    adminOpportunities.length > 0 ? adminOpportunities : opportunities;
 
   const handleSelectItem = (id: string, checked: boolean) => {
     if (checked) {
@@ -281,24 +322,53 @@ export function OpportunityManagement() {
     }
   };
 
-  const filteredOpportunities = _opp.filter((opp) => {
-    const matchesStatus =
-      statusFilter === "all" || opp.status.toLowerCase() === statusFilter;
-    const matchesCategory =
-      categoryFilter === "all" || opp.category.toLowerCase() === categoryFilter;
-    const matchesSearch = opp.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesCategory && matchesSearch;
-  });
+  // Use API data if available, otherwise filter mock data locally
+  const filteredOpportunities =
+    adminOpportunities.length > 0
+      ? adminOpportunities
+      : displayOpportunities.filter((opp) => {
+          const matchesSearch =
+            searchInput === "" ||
+            (opp.title || "").toLowerCase().includes(searchInput.toLowerCase());
+          const matchesStatus =
+            statusFilter === "all" ||
+            (opp.status || "").toLowerCase() === statusFilter.toLowerCase();
+          const matchesCategory =
+            categoryFilter === "all" || opp.category === categoryFilter;
+          return matchesSearch && matchesStatus && matchesCategory;
+        });
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedItems(filteredOpportunities.map((opp) => opp.id));
+      setSelectedItems(filteredOpportunities.map((opp) => String(opp.id)));
     } else {
       setSelectedItems([]);
     }
   };
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              Failed to load opportunities: {error?.message || "Unknown error"}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={refetch}
+              className="ml-4"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -452,17 +522,31 @@ export function OpportunityManagement() {
         <CardContent>
           <div className="flex gap-4 items-end">
             <div className="flex-1">
-              <Label htmlFor="search">Search</Label>
-              <Input
-                id="search"
-                placeholder="Search opportunities..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+              <Label htmlFor="search">Search Opportunities</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="search"
+                  placeholder="Search by title, category, or author..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="pl-10"
+                  disabled={loading}
+                />
+                {loading && searchInput && (
+                  <div className="absolute right-3 top-3">
+                    <RefreshCw className="h-4 w-4 text-muted-foreground animate-spin" />
+                  </div>
+                )}
+              </div>
             </div>
             <div>
               <Label>Status</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select
+                value={statusFilter}
+                onValueChange={setStatusFilter}
+                disabled={loading}
+              >
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
@@ -476,7 +560,11 @@ export function OpportunityManagement() {
             </div>
             <div>
               <Label>Category</Label>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <Select
+                value={categoryFilter}
+                onValueChange={setCategoryFilter}
+                disabled={loading}
+              >
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
@@ -558,80 +646,112 @@ export function OpportunityManagement() {
       {/* Opportunities Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Opportunities ({filteredOpportunities.length})</CardTitle>
+          <CardTitle>
+            Opportunities (
+            {loading
+              ? "..."
+              : adminOpportunities.length > 0
+              ? total
+              : filteredOpportunities.length}
+            )
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={
-                      selectedItems.length === filteredOpportunities.length &&
-                      filteredOpportunities.length > 0
-                    }
-                    onCheckedChange={handleSelectAll}
-                  />
-                </TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date Added</TableHead>
-                <TableHead className="text-right">Views</TableHead>
-                <TableHead className="text-right">Applications</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOpportunities.map((opportunity) => (
-                <TableRow key={opportunity.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedItems.includes(opportunity.id)}
-                      onCheckedChange={(checked) =>
-                        handleSelectItem(opportunity.id, !!checked)
-                      }
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {opportunity.title.substring(0, 20)}
-                  </TableCell>
-                  <TableCell>{opportunity.category}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusColor(opportunity.status)}>
-                      {opportunity.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {formatDate(opportunity.createdAt, { format: "short" })}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {opportunity.views}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {opportunity.applications}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+          {loading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 p-4 border rounded"
+                >
+                  <div className="h-4 w-4 bg-muted animate-pulse rounded" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-48 bg-muted animate-pulse rounded" />
+                    <div className="h-3 w-24 bg-muted animate-pulse rounded" />
+                  </div>
+                  <div className="h-4 w-16 bg-muted animate-pulse rounded" />
+                  <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+                  <div className="h-4 w-12 bg-muted animate-pulse rounded" />
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={
+                        selectedItems.length === filteredOpportunities.length &&
+                        filteredOpportunities.length > 0
+                      }
+                      onCheckedChange={handleSelectAll}
+                      disabled={loading}
+                    />
+                  </TableHead>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Date Added</TableHead>
+                  <TableHead className="text-right">Views</TableHead>
+                  <TableHead className="text-right">Applications</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredOpportunities.map((opportunity: any) => (
+                  <TableRow key={opportunity.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedItems.includes(String(opportunity.id))}
+                        onCheckedChange={(checked) =>
+                          handleSelectItem(String(opportunity.id), !!checked)
+                        }
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {opportunity.title.substring(0, 20)}
+                    </TableCell>
+                    <TableCell>{opportunity.category}</TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusColor(opportunity.status)}>
+                        {opportunity.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {formatDate(
+                        opportunity?.createdAt || opportunity?.dateAdded,
+                        { format: "short" }
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {opportunity.views}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {opportunity.applications}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
