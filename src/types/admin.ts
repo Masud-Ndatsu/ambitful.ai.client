@@ -30,10 +30,19 @@ export interface AdminUser {
   email: string;
   name: string;
   role: string;
-  status: "active" | "inactive";
+  status: "active" | "inactive" | "suspended";
   lastLogin: string;
   createdAt: string;
   permissions: string[];
+  // Extended fields for user management
+  country?: string;
+  verified?: boolean;
+  signupDate?: string;
+  lastActive?: string;
+  interests?: string[];
+  savedOpportunities?: number;
+  appliedOpportunities?: number;
+  chatbotInteractions?: number;
 }
 
 export interface RolePermission {

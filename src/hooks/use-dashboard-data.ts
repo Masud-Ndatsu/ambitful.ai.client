@@ -1,58 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { adminService } from "@/services/adminService";
+import {
+  GetDashboardSummaryResponse,
+  GetDetailedMetricsResponse,
+} from "@/types/admin-service";
 
 interface DashboardData {
-  summary: {
-    overview: {
-      totalUsers: number;
-      activeUsers: number;
-      activeOpportunities: number;
-      totalApplications: number;
-      avgCTR: number;
-    };
-    topPerformingOpportunities: Array<{
-      id: string;
-      title: string;
-      views: number;
-      applications: number;
-      ctr: number;
-    }>;
-    userGrowth: {
-      totalUsers: number;
-      newUsersThisWeek: number;
-      growthRate: number;
-    };
-    systemHealth: {
-      uptime: string;
-      responseTime: string;
-      errorRate: number;
-    };
-  };
-  metrics: {
-    users: any;
-    overview: {
-      visitTrend: Array<{ name: string; visits: number; date?: string }>;
-      topRegions: Array<{
-        country: string;
-        visits: number;
-        percentage: number;
-      }>;
-    };
-    opportunityPerformance: Array<{
-      id: string;
-      title: string;
-      views: number;
-      ctr: number;
-      timeOnPage: string;
-    }>;
-    recentActivity: Array<{
-      id: string;
-      type: string;
-      description: string;
-      timestamp: string;
-    }>;
-  };
+  summary: GetDashboardSummaryResponse;
+  metrics: GetDetailedMetricsResponse;
   draftStats: {
     total: number;
     pending: number;

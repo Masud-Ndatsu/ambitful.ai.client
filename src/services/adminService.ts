@@ -27,6 +27,10 @@ import {
   BulkActionData,
   OpportunityAnalytics,
 } from "@/types/admin-opportunity";
+import {
+  GetDashboardSummaryResponse,
+  GetDetailedMetricsResponse,
+} from "@/types/admin-service";
 
 export class AdminService {
   // System Settings
@@ -118,6 +122,25 @@ export class AdminService {
     const response = await apiService.delete<{ message: string }>(
       `/admin/users/${userId}`
     );
+    return response;
+  }
+
+  async getUserActivity(userId: string): Promise<Array<{
+    id: string;
+    type: string;
+    action: string;
+    details: string;
+    timestamp: string;
+    date: string;
+  }>> {
+    const response = await apiService.get<Array<{
+      id: string;
+      type: string;
+      action: string;
+      details: string;
+      timestamp: string;
+      date: string;
+    }>>(`/admin/users/${userId}/activity`);
     return response;
   }
 
@@ -322,58 +345,10 @@ export class AdminService {
   }
 
   // Dashboard specific endpoints
-  async getDashboardSummary(): Promise<{
-    overview: {
-      totalUsers: number;
-      activeUsers: number;
-      activeOpportunities: number;
-      totalApplications: number;
-      avgCTR: number;
-    };
-    topPerformingOpportunities: Array<{
-      id: string;
-      title: string;
-      views: number;
-      applications: number;
-      ctr: number;
-    }>;
-    userGrowth: {
-      totalUsers: number;
-      newUsersThisWeek: number;
-      growthRate: number;
-    };
-    systemHealth: {
-      uptime: string;
-      responseTime: string;
-      errorRate: number;
-    };
-  }> {
-    return await apiService.get<{
-      overview: {
-        totalUsers: number;
-        activeUsers: number;
-        activeOpportunities: number;
-        totalApplications: number;
-        avgCTR: number;
-      };
-      topPerformingOpportunities: Array<{
-        id: string;
-        title: string;
-        views: number;
-        applications: number;
-        ctr: number;
-      }>;
-      userGrowth: {
-        totalUsers: number;
-        newUsersThisWeek: number;
-        growthRate: number;
-      };
-      systemHealth: {
-        uptime: string;
-        responseTime: string;
-        errorRate: number;
-      };
-    }>("/admin/analytics/dashboard");
+  async getDashboardSummary(): Promise<GetDashboardSummaryResponse> {
+    return await apiService.get<GetDashboardSummaryResponse>(
+      "/admin/analytics/dashboard"
+    );
   }
 
   async getAIDraftStats(): Promise<{
@@ -392,59 +367,12 @@ export class AdminService {
     }>("/admin/ai-drafts-stats");
   }
 
-  async getDetailedMetrics(period: "7d" | "30d" | "90d" = "30d"): Promise<{
-    users: any;
-    overview: {
-      visitTrend: Array<{ name: string; visits: number; date?: string }>;
-      topRegions: Array<{
-        country: string;
-        visits: number;
-        percentage: number;
-      }>;
-    };
-    opportunityPerformance: Array<{
-      id: string;
-      title: string;
-      views: number;
-      ctr: number;
-      timeOnPage: string;
-    }>;
-    recentActivity: Array<{
-      id: string;
-      type: string;
-      description: string;
-      timestamp: string;
-    }>;
-  }> {
-    return await apiService.get<{
-      users: any;
-      overview: {
-        visitTrend: Array<{ name: string; visits: number; date?: string }>;
-        topRegions: Array<{
-          country: string;
-          visits: number;
-          percentage: number;
-        }>;
-      };
-      topRegions: Array<{
-        country: string;
-        visits: number;
-        percentage: number;
-      }>;
-      opportunityPerformance: Array<{
-        id: string;
-        title: string;
-        views: number;
-        ctr: number;
-        timeOnPage: string;
-      }>;
-      recentActivity: Array<{
-        id: string;
-        type: string;
-        description: string;
-        timestamp: string;
-      }>;
-    }>(`/admin/analytics/detailed?period=${period}`);
+  async getDetailedMetrics(
+    period: "7d" | "30d" | "90d" = "30d"
+  ): Promise<GetDetailedMetricsResponse> {
+    return await apiService.get<GetDetailedMetricsResponse>(
+      `/admin/analytics/detailed?period=${period}`
+    );
   }
 
   async getAIDrafts(

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -45,82 +45,16 @@ import {
   Mail,
   MessageSquare,
   BookmarkPlus,
+  X,
 } from "lucide-react";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
+import { useUserManagement } from "@/hooks/use-user-management";
+import { useDebounce } from "@/hooks/use-debounce";
+import { AdminUser } from "@/types/admin";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, RefreshCw } from "lucide-react";
 
-const users = [
-  {
-    id: 1,
-    name: "Amara Okafor",
-    email: "amara.okafor@email.com",
-    country: "Nigeria",
-    status: "active",
-    verified: true,
-    signupDate: "2024-01-15",
-    lastActive: "2024-01-25",
-    interests: ["Technology", "Education"],
-    savedOpportunities: 12,
-    appliedOpportunities: 5,
-    chatbotInteractions: 23,
-  },
-  {
-    id: 2,
-    name: "James Kimani",
-    email: "james.kimani@email.com",
-    country: "Kenya",
-    status: "active",
-    verified: true,
-    signupDate: "2024-01-18",
-    lastActive: "2024-01-26",
-    interests: ["Environment", "Finance"],
-    savedOpportunities: 8,
-    appliedOpportunities: 3,
-    chatbotInteractions: 15,
-  },
-  {
-    id: 3,
-    name: "Sarah Mensah",
-    email: "sarah.mensah@email.com",
-    country: "Ghana",
-    status: "inactive",
-    verified: false,
-    signupDate: "2024-01-20",
-    lastActive: "2024-01-22",
-    interests: ["Health", "Education"],
-    savedOpportunities: 3,
-    appliedOpportunities: 0,
-    chatbotInteractions: 5,
-  },
-  {
-    id: 4,
-    name: "David Mthembu",
-    email: "david.mthembu@email.com",
-    country: "South Africa",
-    status: "active",
-    verified: true,
-    signupDate: "2024-01-12",
-    lastActive: "2024-01-26",
-    interests: ["Technology", "Finance"],
-    savedOpportunities: 15,
-    appliedOpportunities: 8,
-    chatbotInteractions: 31,
-  },
-  {
-    id: 5,
-    name: "Grace Nakato",
-    email: "grace.nakato@email.com",
-    country: "Uganda",
-    status: "active",
-    verified: true,
-    signupDate: "2024-01-22",
-    lastActive: "2024-01-25",
-    interests: ["Environment", "Health"],
-    savedOpportunities: 6,
-    appliedOpportunities: 2,
-    chatbotInteractions: 11,
-  },
-];
-
+// Mock interaction history - this should come from the API in a real implementation
 const interactionHistory = [
   {
     date: "2024-01-26",
@@ -155,11 +89,27 @@ const interactionHistory = [
 ];
 
 export function UserManagement() {
-  const [selectedUser, setSelectedUser] = useState(users[0]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [countryFilter, setCountryFilter] = useState("all");
-  const { data, loading, error, refetch } = useDashboardData();
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 300); // 300ms delay
+
+  const { data: dashboardData } = useDashboardData();
+  const {
+    users,
+    total,
+    loading,
+    error,
+    filters,
+    setFilters,
+    updateUserStatus,
+    getUserActivity,
+    refetch,
+  } = useUserManagement();
+
+  // Update filters when debounced search changes
+  useEffect(() => {
+    setFilters({ search: debouncedSearch, page: 1 });
+  }, [debouncedSearch, setFilters]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -174,8 +124,6 @@ export function UserManagement() {
     }
   };
 
-  console.log("USER DATA:", data);
-
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -184,16 +132,54 @@ export function UserManagement() {
       .toUpperCase();
   };
 
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || user.status === statusFilter;
-    const matchesCountry =
-      countryFilter === "all" || user.country === countryFilter;
-    return matchesSearch && matchesStatus && matchesCountry;
-  });
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchInput(value);
+  }, []);
+
+  const clearSearch = useCallback(() => {
+    setSearchInput("");
+  }, []);
+
+  const handleStatusChange = (value: string) => {
+    setFilters({ status: value, page: 1 });
+  };
+
+  const handleCountryChange = (value: string) => {
+    setFilters({ country: value, page: 1 });
+  };
+
+  const handleUserStatusUpdate = async (
+    userId: string,
+    status: "active" | "inactive" | "suspended"
+  ) => {
+    try {
+      await updateUserStatus(userId, status);
+    } catch (error) {
+      console.error("Failed to update user status:", error);
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>Failed to load user data: {error}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={refetch}
+              className="ml-4"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -218,7 +204,9 @@ export function UserManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {data?.metrics?.users?.totalUsers}
+              {loading
+                ? "..."
+                : dashboardData?.metrics?.users?.totalUsers || total}
             </div>
             <p className="text-xs text-muted-foreground">+3 this week</p>
           </CardContent>
@@ -229,7 +217,10 @@ export function UserManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {data?.metrics?.users?.activeUsers}
+              {loading
+                ? "..."
+                : dashboardData?.metrics?.users?.activeUsers ||
+                  users.filter((u) => u.status === "active").length}
             </div>
             <p className="text-xs text-muted-foreground">80% of total</p>
           </CardContent>
@@ -242,7 +233,10 @@ export function UserManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {data?.metrics?.users?.verifiedUsers}
+              {loading
+                ? "..."
+                : dashboardData?.metrics?.users?.verifiedUsers ||
+                  users.filter((u) => u.verified).length}
             </div>
             <p className="text-xs text-muted-foreground">80% verified</p>
           </CardContent>
@@ -255,7 +249,15 @@ export function UserManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {data?.metrics?.users?.verifiedUsers}
+              {loading
+                ? "..."
+                : dashboardData?.metrics?.users?.avgInteractions ||
+                  Math.round(
+                    users.reduce(
+                      (sum, u) => sum + (u.chatbotInteractions || 0),
+                      0
+                    ) / Math.max(users.length, 1)
+                  )}
             </div>
             <p className="text-xs text-muted-foreground">per user</p>
           </CardContent>
@@ -279,15 +281,25 @@ export function UserManagement() {
                 <Input
                   id="search"
                   placeholder="Search by name or email..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={searchInput}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   className="pl-10"
+                  disabled={loading}
                 />
+                {loading && searchInput && (
+                  <div className="absolute right-3 top-3">
+                    <RefreshCw className="h-4 w-4 text-muted-foreground animate-spin" />
+                  </div>
+                )}
               </div>
             </div>
             <div>
               <Label>Status</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select
+                value={filters.status || "all"}
+                onValueChange={handleStatusChange}
+                disabled={loading}
+              >
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
@@ -301,7 +313,11 @@ export function UserManagement() {
             </div>
             <div>
               <Label>Country</Label>
-              <Select value={countryFilter} onValueChange={setCountryFilter}>
+              <Select
+                value={filters.country || "all"}
+                onValueChange={handleCountryChange}
+                disabled={loading}
+              >
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
@@ -322,110 +338,130 @@ export function UserManagement() {
       {/* Users Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Users ({filteredUsers.length})</CardTitle>
+          <CardTitle>Users ({loading ? "..." : total})</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Country</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Verified</TableHead>
-                <TableHead>Signup Date</TableHead>
-                <TableHead>Last Active</TableHead>
-                <TableHead className="text-right">Interactions</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={`/placeholder.svg?text=${getInitials(
-                            user.name
-                          )}`}
-                        />
-                        <AvatarFallback>
-                          {getInitials(user.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{user.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {user.email}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{user.country}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusColor(user.status) as any}>
-                      {user.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {user.verified ? (
-                      <Badge variant="default">Verified</Badge>
-                    ) : (
-                      <Badge variant="secondary">Unverified</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>{user.signupDate}</TableCell>
-                  <TableCell>{user.lastActive}</TableCell>
-                  <TableCell className="text-right">
-                    {user.chatbotInteractions}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSelectedUser(user)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>
-                              User Details: {selectedUser.name}
-                            </DialogTitle>
-                            <DialogDescription>
-                              View user profile and activity
-                            </DialogDescription>
-                          </DialogHeader>
-                          <UserDetailModal user={selectedUser} />
-                        </DialogContent>
-                      </Dialog>
-                      <Button variant="ghost" size="sm">
-                        <Mail className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive"
-                      >
-                        <UserX className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+          {loading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 p-4 border rounded"
+                >
+                  <div className="h-8 w-8 bg-muted animate-pulse rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+                    <div className="h-3 w-48 bg-muted animate-pulse rounded" />
+                  </div>
+                  <div className="h-4 w-16 bg-muted animate-pulse rounded" />
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Country</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Verified</TableHead>
+                  <TableHead>Signup Date</TableHead>
+                  <TableHead>Last Active</TableHead>
+                  <TableHead className="text-right">Interactions</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src={`/placeholder.svg?text=${getInitials(
+                              user.name
+                            )}`}
+                          />
+                          <AvatarFallback>
+                            {getInitials(user.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{user.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{user.country || "N/A"}</TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusColor(user.status) as any}>
+                        {user.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {user.verified ? (
+                        <Badge variant="default">Verified</Badge>
+                      ) : (
+                        <Badge variant="secondary">Unverified</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>{user.signupDate || user.createdAt}</TableCell>
+                    <TableCell>{user.lastActive || user.lastLogin}</TableCell>
+                    <TableCell className="text-right">
+                      {user.chatbotInteractions || 0}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedUser(user)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>
+                                User Details: {selectedUser?.name || user.name}
+                              </DialogTitle>
+                              <DialogDescription>
+                                View user profile and activity
+                              </DialogDescription>
+                            </DialogHeader>
+                            {selectedUser && (
+                              <UserDetailModal user={selectedUser} />
+                            )}
+                          </DialogContent>
+                        </Dialog>
+                        <Button variant="ghost" size="sm">
+                          <Mail className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive"
+                        >
+                          <UserX className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
   );
 }
 
-function UserDetailModal({ user }: { user: (typeof users)[0] }) {
+function UserDetailModal({ user }: { user: AdminUser }) {
   return (
     <Tabs defaultValue="profile" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
@@ -462,24 +498,24 @@ function UserDetailModal({ user }: { user: (typeof users)[0] }) {
           <div className="grid gap-2">
             <div className="flex justify-between">
               <span className="font-medium">Country:</span>
-              <span>{user.country}</span>
+              <span>{user.country || "N/A"}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Signup Date:</span>
-              <span>{user.signupDate}</span>
+              <span>{user.signupDate || user.createdAt}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Last Active:</span>
-              <span>{user.lastActive}</span>
+              <span>{user.lastActive || user.lastLogin}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Interests:</span>
               <div className="flex gap-1">
-                {user.interests.map((interest) => (
+                {user.interests?.map((interest) => (
                   <Badge key={interest} variant="outline">
                     {interest}
                   </Badge>
-                ))}
+                )) || <span className="text-muted-foreground">None</span>}
               </div>
             </div>
           </div>
@@ -494,7 +530,7 @@ function UserDetailModal({ user }: { user: (typeof users)[0] }) {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {user.chatbotInteractions}
+                {user.chatbotInteractions || 0}
               </div>
             </CardContent>
           </Card>
@@ -504,7 +540,7 @@ function UserDetailModal({ user }: { user: (typeof users)[0] }) {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {user.savedOpportunities}
+                {user.savedOpportunities || 0}
               </div>
             </CardContent>
           </Card>
@@ -514,7 +550,7 @@ function UserDetailModal({ user }: { user: (typeof users)[0] }) {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {user.appliedOpportunities}
+                {user.appliedOpportunities || 0}
               </div>
             </CardContent>
           </Card>
@@ -574,7 +610,7 @@ function UserDetailModal({ user }: { user: (typeof users)[0] }) {
                 </div>
                 <div className="p-2 border rounded">Microsoft LEAP Program</div>
                 <Button variant="outline" size="sm" className="w-full mt-2">
-                  View All ({user.savedOpportunities})
+                  View All ({user.savedOpportunities || 0})
                 </Button>
               </div>
             </CardContent>
@@ -591,7 +627,7 @@ function UserDetailModal({ user }: { user: (typeof users)[0] }) {
                   UN Youth Climate Summit
                 </div>
                 <Button variant="outline" size="sm" className="w-full mt-2">
-                  View All ({user.appliedOpportunities})
+                  View All ({user.appliedOpportunities || 0})
                 </Button>
               </div>
             </CardContent>

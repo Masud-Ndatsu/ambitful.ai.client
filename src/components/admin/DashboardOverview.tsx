@@ -102,7 +102,7 @@ export function DashboardOverview() {
     );
   }
 
-  console.log({ data: data.metrics });
+  console.log({ data });
 
   if (!data) return null;
 
@@ -124,13 +124,13 @@ export function DashboardOverview() {
     {
       title: "Pending Drafts",
       value: data.draftStats.pending.toString(),
-      change: `+${data.draftStats?.pending - data.draftStats?.approved}`,
+      change: `+${data.draftStats.pending - data.draftStats.approved}`,
       icon: Clock,
       trend: "up",
     },
     {
       title: "Avg. CTR",
-      value: `${(data.summary.overview?.avgCTR * 100).toFixed(1)}%`,
+      value: `${(data.summary.overview.avgCTR * 100).toFixed(1)}%`,
       change: "+1.2%",
       icon: Eye,
       trend: "up",
@@ -166,9 +166,7 @@ export function DashboardOverview() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Site Visits</CardTitle>
-              <CardDescription>
-                Previous week's visits (Mon-Fri)
-              </CardDescription>
+              <CardDescription>Daily visits over the past week</CardDescription>
             </div>
             <Button variant="outline" size="sm" onClick={refetch}>
               <RefreshCw className="h-4 w-4 mr-2" />
@@ -177,30 +175,11 @@ export function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={data.metrics?.overview?.visitTrend?.map((item) => ({
-                  ...item,
-                  name: new Date(item.date).toLocaleDateString("en-US", {
-                    weekday: "short",
-                  }),
-                }))}
-              >
+              <BarChart data={data.summary.overview.visitTrend}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis dataKey="date" />
                 <YAxis />
-                <Tooltip
-                  formatter={(value, name) => [value, "Visits"]}
-                  labelFormatter={(label, payload) => {
-                    if (payload && payload[0]) {
-                      const date = new Date(payload[0].payload.date);
-                      return `${label}, ${date.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}`;
-                    }
-                    return label;
-                  }}
-                />
+                <Tooltip />
                 <Bar dataKey="visits" fill="hsl(var(--primary))" />
               </BarChart>
             </ResponsiveContainer>
@@ -215,7 +194,7 @@ export function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {data.metrics.overview?.topRegions?.map((region) => (
+              {data.summary.overview.topRegions?.map((region) => (
                 <div
                   key={region.country}
                   className="flex items-center justify-between"
@@ -262,8 +241,8 @@ export function DashboardOverview() {
               <TableBody>
                 {data.summary.topPerformingOpportunities
                   .slice(0, 4)
-                  .map((opp, index) => (
-                    <TableRow key={index.toString()}>
+                  .map((opp) => (
+                    <TableRow key={opp.opportunityId}>
                       <TableCell className="font-medium">{opp.title}</TableCell>
                       <TableCell className="text-right">
                         {opp.views.toLocaleString()}
