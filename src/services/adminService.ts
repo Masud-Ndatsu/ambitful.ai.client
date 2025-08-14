@@ -393,6 +393,7 @@ export class AdminService {
   }
 
   async getDetailedMetrics(period: "7d" | "30d" | "90d" = "30d"): Promise<{
+    users: any;
     overview: {
       visitTrend: Array<{ name: string; visits: number; date?: string }>;
       topRegions: Array<{
@@ -416,6 +417,7 @@ export class AdminService {
     }>;
   }> {
     return await apiService.get<{
+      users: any;
       overview: {
         visitTrend: Array<{ name: string; visits: number; date?: string }>;
         topRegions: Array<{

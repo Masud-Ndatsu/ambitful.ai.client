@@ -1,15 +1,52 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { Search, Filter, Download, Eye, Edit, UserX, Mail, MessageSquare, BookmarkPlus } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Download,
+  Eye,
+  Edit,
+  UserX,
+  Mail,
+  MessageSquare,
+  BookmarkPlus,
+} from "lucide-react";
+import { useDashboardData } from "@/hooks/use-dashboard-data";
 
 const users = [
   {
@@ -24,7 +61,7 @@ const users = [
     interests: ["Technology", "Education"],
     savedOpportunities: 12,
     appliedOpportunities: 5,
-    chatbotInteractions: 23
+    chatbotInteractions: 23,
   },
   {
     id: 2,
@@ -38,7 +75,7 @@ const users = [
     interests: ["Environment", "Finance"],
     savedOpportunities: 8,
     appliedOpportunities: 3,
-    chatbotInteractions: 15
+    chatbotInteractions: 15,
   },
   {
     id: 3,
@@ -52,7 +89,7 @@ const users = [
     interests: ["Health", "Education"],
     savedOpportunities: 3,
     appliedOpportunities: 0,
-    chatbotInteractions: 5
+    chatbotInteractions: 5,
   },
   {
     id: 4,
@@ -66,7 +103,7 @@ const users = [
     interests: ["Technology", "Finance"],
     savedOpportunities: 15,
     appliedOpportunities: 8,
-    chatbotInteractions: 31
+    chatbotInteractions: 31,
   },
   {
     id: 5,
@@ -80,16 +117,41 @@ const users = [
     interests: ["Environment", "Health"],
     savedOpportunities: 6,
     appliedOpportunities: 2,
-    chatbotInteractions: 11
-  }
+    chatbotInteractions: 11,
+  },
 ];
 
 const interactionHistory = [
-  { date: "2024-01-26", type: "chatbot", action: "Asked about tech internships", details: "Query: 'Best tech internships for students?'" },
-  { date: "2024-01-25", type: "save", action: "Saved opportunity", details: "Google Summer of Code 2024" },
-  { date: "2024-01-24", type: "apply", action: "Applied to opportunity", details: "Microsoft LEAP Program" },
-  { date: "2024-01-23", type: "chatbot", action: "Career guidance session", details: "15-minute conversation about career paths" },
-  { date: "2024-01-22", type: "save", action: "Saved opportunity", details: "AWS Cloud Training Program" },
+  {
+    date: "2024-01-26",
+    type: "chatbot",
+    action: "Asked about tech internships",
+    details: "Query: 'Best tech internships for students?'",
+  },
+  {
+    date: "2024-01-25",
+    type: "save",
+    action: "Saved opportunity",
+    details: "Google Summer of Code 2024",
+  },
+  {
+    date: "2024-01-24",
+    type: "apply",
+    action: "Applied to opportunity",
+    details: "Microsoft LEAP Program",
+  },
+  {
+    date: "2024-01-23",
+    type: "chatbot",
+    action: "Career guidance session",
+    details: "15-minute conversation about career paths",
+  },
+  {
+    date: "2024-01-22",
+    type: "save",
+    action: "Saved opportunity",
+    details: "AWS Cloud Training Program",
+  },
 ];
 
 export function UserManagement() {
@@ -97,25 +159,39 @@ export function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [countryFilter, setCountryFilter] = useState("all");
+  const { data, loading, error, refetch } = useDashboardData();
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "default";
-      case "inactive": return "secondary";
-      case "suspended": return "destructive";
-      default: return "secondary";
+      case "active":
+        return "default";
+      case "inactive":
+        return "secondary";
+      case "suspended":
+        return "destructive";
+      default:
+        return "secondary";
     }
   };
 
+  console.log("USER DATA:", data);
+
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
   };
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || user.status === statusFilter;
-    const matchesCountry = countryFilter === "all" || user.country === countryFilter;
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || user.status === statusFilter;
+    const matchesCountry =
+      countryFilter === "all" || user.country === countryFilter;
     return matchesSearch && matchesStatus && matchesCountry;
   });
 
@@ -124,7 +200,9 @@ export function UserManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold">User Management</h2>
-          <p className="text-muted-foreground">Manage user accounts and track engagement</p>
+          <p className="text-muted-foreground">
+            Manage user accounts and track engagement
+          </p>
         </div>
         <Button variant="outline">
           <Download className="h-4 w-4 mr-2" />
@@ -139,7 +217,9 @@ export function UserManagement() {
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{users.length}</div>
+            <div className="text-2xl font-bold">
+              {data?.metrics?.users?.totalUsers}
+            </div>
             <p className="text-xs text-muted-foreground">+3 this week</p>
           </CardContent>
         </Card>
@@ -148,25 +228,35 @@ export function UserManagement() {
             <CardTitle className="text-sm font-medium">Active Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{users.filter(u => u.status === 'active').length}</div>
+            <div className="text-2xl font-bold">
+              {data?.metrics?.users?.activeUsers}
+            </div>
             <p className="text-xs text-muted-foreground">80% of total</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Verified Users</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Verified Users
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{users.filter(u => u.verified).length}</div>
+            <div className="text-2xl font-bold">
+              {data?.metrics?.users?.verifiedUsers}
+            </div>
             <p className="text-xs text-muted-foreground">80% verified</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Interactions</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Avg. Interactions
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">17</div>
+            <div className="text-2xl font-bold">
+              {data?.metrics?.users?.verifiedUsers}
+            </div>
             <p className="text-xs text-muted-foreground">per user</p>
           </CardContent>
         </Card>
@@ -186,9 +276,9 @@ export function UserManagement() {
               <Label htmlFor="search">Search Users</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input 
+                <Input
                   id="search"
-                  placeholder="Search by name or email..." 
+                  placeholder="Search by name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -254,12 +344,20 @@ export function UserManagement() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={`/placeholder.svg?text=${getInitials(user.name)}`} />
-                        <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                        <AvatarImage
+                          src={`/placeholder.svg?text=${getInitials(
+                            user.name
+                          )}`}
+                        />
+                        <AvatarFallback>
+                          {getInitials(user.name)}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{user.name}</p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {user.email}
+                        </p>
                       </div>
                     </div>
                   </TableCell>
@@ -278,19 +376,29 @@ export function UserManagement() {
                   </TableCell>
                   <TableCell>{user.signupDate}</TableCell>
                   <TableCell>{user.lastActive}</TableCell>
-                  <TableCell className="text-right">{user.chatbotInteractions}</TableCell>
+                  <TableCell className="text-right">
+                    {user.chatbotInteractions}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button variant="ghost" size="sm" onClick={() => setSelectedUser(user)}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedUser(user)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl">
                           <DialogHeader>
-                            <DialogTitle>User Details: {selectedUser.name}</DialogTitle>
-                            <DialogDescription>View user profile and activity</DialogDescription>
+                            <DialogTitle>
+                              User Details: {selectedUser.name}
+                            </DialogTitle>
+                            <DialogDescription>
+                              View user profile and activity
+                            </DialogDescription>
                           </DialogHeader>
                           <UserDetailModal user={selectedUser} />
                         </DialogContent>
@@ -298,7 +406,11 @@ export function UserManagement() {
                       <Button variant="ghost" size="sm">
                         <Mail className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-destructive">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive"
+                      >
                         <UserX className="h-4 w-4" />
                       </Button>
                     </div>
@@ -313,7 +425,7 @@ export function UserManagement() {
   );
 }
 
-function UserDetailModal({ user }: { user: typeof users[0] }) {
+function UserDetailModal({ user }: { user: (typeof users)[0] }) {
   return (
     <Tabs defaultValue="profile" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
@@ -327,21 +439,26 @@ function UserDetailModal({ user }: { user: typeof users[0] }) {
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
               <AvatarFallback className="text-lg">
-                {user.name.split(' ').map(n => n[0]).join('')}
+                {user.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")}
               </AvatarFallback>
             </Avatar>
             <div>
               <h3 className="text-lg font-semibold">{user.name}</h3>
               <p className="text-muted-foreground">{user.email}</p>
               <div className="flex gap-2 mt-2">
-                <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
+                <Badge
+                  variant={user.status === "active" ? "default" : "secondary"}
+                >
                   {user.status}
                 </Badge>
                 {user.verified && <Badge>Verified</Badge>}
               </div>
             </div>
           </div>
-          
+
           <div className="grid gap-2">
             <div className="flex justify-between">
               <span className="font-medium">Country:</span>
@@ -358,8 +475,10 @@ function UserDetailModal({ user }: { user: typeof users[0] }) {
             <div className="flex justify-between">
               <span className="font-medium">Interests:</span>
               <div className="flex gap-1">
-                {user.interests.map(interest => (
-                  <Badge key={interest} variant="outline">{interest}</Badge>
+                {user.interests.map((interest) => (
+                  <Badge key={interest} variant="outline">
+                    {interest}
+                  </Badge>
                 ))}
               </div>
             </div>
@@ -374,7 +493,9 @@ function UserDetailModal({ user }: { user: typeof users[0] }) {
               <CardTitle className="text-sm">Chatbot Interactions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{user.chatbotInteractions}</div>
+              <div className="text-2xl font-bold">
+                {user.chatbotInteractions}
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -382,7 +503,9 @@ function UserDetailModal({ user }: { user: typeof users[0] }) {
               <CardTitle className="text-sm">Saved Opportunities</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{user.savedOpportunities}</div>
+              <div className="text-2xl font-bold">
+                {user.savedOpportunities}
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -390,7 +513,9 @@ function UserDetailModal({ user }: { user: typeof users[0] }) {
               <CardTitle className="text-sm">Applications</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{user.appliedOpportunities}</div>
+              <div className="text-2xl font-bold">
+                {user.appliedOpportunities}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -402,16 +527,29 @@ function UserDetailModal({ user }: { user: typeof users[0] }) {
           <CardContent>
             <div className="space-y-3">
               {interactionHistory.map((interaction, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-start gap-3 p-3 border rounded-lg"
+                >
                   <div className="flex-shrink-0 mt-1">
-                    {interaction.type === 'chatbot' && <MessageSquare className="h-4 w-4 text-blue-500" />}
-                    {interaction.type === 'save' && <BookmarkPlus className="h-4 w-4 text-green-500" />}
-                    {interaction.type === 'apply' && <Edit className="h-4 w-4 text-purple-500" />}
+                    {interaction.type === "chatbot" && (
+                      <MessageSquare className="h-4 w-4 text-blue-500" />
+                    )}
+                    {interaction.type === "save" && (
+                      <BookmarkPlus className="h-4 w-4 text-green-500" />
+                    )}
+                    {interaction.type === "apply" && (
+                      <Edit className="h-4 w-4 text-purple-500" />
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-sm">{interaction.action}</p>
-                    <p className="text-xs text-muted-foreground">{interaction.details}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{interaction.date}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {interaction.details}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {interaction.date}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -428,8 +566,12 @@ function UserDetailModal({ user }: { user: typeof users[0] }) {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <div className="p-2 border rounded">Google Summer of Code 2024</div>
-                <div className="p-2 border rounded">AWS Cloud Training Program</div>
+                <div className="p-2 border rounded">
+                  Google Summer of Code 2024
+                </div>
+                <div className="p-2 border rounded">
+                  AWS Cloud Training Program
+                </div>
                 <div className="p-2 border rounded">Microsoft LEAP Program</div>
                 <Button variant="outline" size="sm" className="w-full mt-2">
                   View All ({user.savedOpportunities})
@@ -445,7 +587,9 @@ function UserDetailModal({ user }: { user: typeof users[0] }) {
             <CardContent>
               <div className="space-y-2">
                 <div className="p-2 border rounded">Microsoft LEAP Program</div>
-                <div className="p-2 border rounded">UN Youth Climate Summit</div>
+                <div className="p-2 border rounded">
+                  UN Youth Climate Summit
+                </div>
                 <Button variant="outline" size="sm" className="w-full mt-2">
                   View All ({user.appliedOpportunities})
                 </Button>

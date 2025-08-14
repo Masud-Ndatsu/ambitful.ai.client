@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { adminService } from "@/services/adminService";
 
@@ -29,6 +30,7 @@ interface DashboardData {
     };
   };
   metrics: {
+    users: any;
     overview: {
       visitTrend: Array<{ name: string; visits: number; date?: string }>;
       topRegions: Array<{
