@@ -4,26 +4,29 @@ import heroImage from "@/assets/hero-image.jpg";
 
 const HeroSection = () => {
   const scrollToOpportunities = () => {
-    const section = document.getElementById('featured-opportunities');
+    const section = document.getElementById("featured-opportunities");
     if (section) {
-      section.scrollIntoView({ behavior: 'smooth' });
+      section.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   const scrollToChat = () => {
-    const chatWidget = document.getElementById('chat-widget');
+    const chatWidget = document.getElementById("chat-widget");
     if (chatWidget) {
-      chatWidget.scrollIntoView({ behavior: 'smooth' });
+      chatWidget.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section
+      id="home"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+    >
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src={heroImage} 
-          alt="Young people discovering opportunities with AI" 
+        <img
+          src={heroImage}
+          alt="Young people discovering opportunities with AI"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-primary-glow/80"></div>
@@ -33,20 +36,20 @@ const HeroSection = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-            Discover Opportunities.{" "}
+            Let’s make your dream a reality.
             <span className="block bg-gradient-to-r from-primary-glow to-white bg-clip-text text-transparent">
-              Empower Your Future.
+              Starting now
             </span>
           </h1>
-          
-          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+
+          {/* <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
             Unlock life-changing opportunities with the power of AI. From scholarships to internships, 
             we help young people like you find the perfect path to success.
-          </p>
+          </p> */}
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Button 
+            <Button
               size="lg"
               onClick={scrollToOpportunities}
               className="bg-white text-primary hover:bg-white/90 hover:shadow-glow transition-all duration-300 text-lg px-8 py-6"
@@ -55,8 +58,8 @@ const HeroSection = () => {
               Browse Opportunities
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            
-            <Button 
+
+            <Button
               size="lg"
               variant="outline"
               onClick={scrollToChat}

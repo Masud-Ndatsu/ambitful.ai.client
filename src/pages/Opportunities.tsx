@@ -107,13 +107,9 @@ const Opportunities = () => {
         <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-subtle">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-8">
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-                Explore Opportunities
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
+                Discover Opportunities... Empower Your Future.
               </h1>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Discover thousands of scholarships, internships, and fellowships
-                curated specifically for young professionals like you
-              </p>
             </div>
 
             <OpportunitySearch
@@ -132,7 +128,6 @@ const Opportunities = () => {
                 <OpportunityFilters
                   selectedFilters={{
                     categories: filters.category ? [filters.category] : [],
-                    locations: filters.location ? [filters.location] : [],
                     types: filters.type ? [filters.type] : [],
                     deadlines: "",
                     sortBy: filters.sortBy || "newest",
