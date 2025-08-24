@@ -33,7 +33,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              <span className="text-2xl font-bold bg-primary bg-clip-text text-transparent">
                 AmbitfulAI
               </span>
             </div>
