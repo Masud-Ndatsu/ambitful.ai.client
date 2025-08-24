@@ -17,11 +17,6 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto">
         {/* Brand & Social Media */}
         <div className="text-center mb-12">
-          {/* <div className="flex items-center justify-center mb-6">
-            <span className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              AmbifulAI
-            </span>
-          </div> */}
           <div className="flex justify-center space-x-4">
             <Button
               variant="ghost"
@@ -60,16 +55,16 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="flex items-center justify-center md:justify-start space-x-3">
             <Mail className="h-5 w-5 text-primary" />
-            <span className="text-muted">support@opportunityai.com</span>
+            <span className="text-muted">support@ambitful.ai</span>
           </div>
           <div className="flex items-center justify-center space-x-3">
             <Phone className="h-5 w-5 text-primary" />
             <span className="text-muted">+1 (555) 123-4567</span>
           </div>
-          <div className="flex items-center justify-center md:justify-end space-x-3">
+          {/* <div className="flex items-center justify-center md:justify-end space-x-3">
             <MapPin className="h-5 w-5 text-primary" />
             <span className="text-muted">San Francisco, CA</span>
-          </div>
+          </div> */}
         </div>
 
         <Separator className="bg-background/20 mb-8" />
@@ -77,7 +72,7 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
           <p className="text-muted text-sm mb-4 md:mb-0">
-            © 2024 OpportunityAI. All rights reserved.
+            © 2024 AmbitfulAI. All rights reserved.
           </p>
           <div className="flex space-x-6">
             <a

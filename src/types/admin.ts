@@ -56,13 +56,14 @@ export interface CrawlingSource {
   id: string;
   name: string;
   url: string;
-  type: "web_scraping" | "rss_feed" | "api";
-  status: "active" | "inactive";
-  lastCrawled: string;
-  crawlFrequency: "hourly" | "daily" | "weekly";
-  selectors?: Record<string, string>;
-  tags: string[];
-  priority: "low" | "medium" | "high";
+  status: "active" | "paused" | "disabled";
+  frequency: "hourly" | "daily" | "weekly" | "monthly";
+  maxResults: number;
+  lastCrawl?: string;
+  lastSuccess: boolean;
+  errorMessage?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CrawlingSettings {

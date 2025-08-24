@@ -292,7 +292,7 @@ const FeaturedOpportunities = () => {
 
                   <CardFooter className="pt-3">
                     <Button
-                      className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
+                      className="w-full border text-primary hover:text-white bg-gradient-primary hover:shadow-glow transition-all duration-300"
                       onClick={() =>
                         // window.open(opportunity.link || "#", "_blank")
                         navigate(`/opportunities?opportunity=${opportunity.id}`)

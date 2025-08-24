@@ -179,7 +179,7 @@ export const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                   </SelectTrigger>
                   <SelectContent>
                     {countries.map((country) => (
-                      <SelectItem key={country.value} value={country.value}>
+                      <SelectItem key={country.value} value={country.label}>
                         {country.label}
                       </SelectItem>
                     ))}

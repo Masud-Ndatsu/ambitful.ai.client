@@ -82,7 +82,8 @@ export const OpportunityCard = ({
           <div className="ml-6 flex flex-col gap-2">
             <Button onClick={onViewDetails}>View Details</Button>
             <Button
-              variant="outline"
+              // variant="outline"
+              className="!bg-primary-glow"
               size="sm"
               onClick={() => window.open(opportunity.link, "_blank")}
             >

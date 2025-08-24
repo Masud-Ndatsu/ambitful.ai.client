@@ -29,7 +29,8 @@ const HeroSection = () => {
           alt="Young people discovering opportunities with AI"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-primary-glow/80"></div>
+        {/* <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-primary-glow/80"></div> */}
+        <div className="absolute inset-0 bg-gradient-hero"></div>
       </div>
 
       {/* Content */}
@@ -42,17 +43,12 @@ const HeroSection = () => {
             </span>
           </h1>
 
-          {/* <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Unlock life-changing opportunities with the power of AI. From scholarships to internships, 
-            we help young people like you find the perfect path to success.
-          </p> */}
-
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button
               size="lg"
               onClick={scrollToOpportunities}
-              className="bg-white text-primary hover:bg-white/90 hover:shadow-glow transition-all duration-300 text-lg px-8 py-6"
+              className="bg-white text-primary-glow hover:bg-white/90 hover:shadow-glow transition-all duration-300 text-lg px-8 py-6"
             >
               <Search className="mr-2 h-5 w-5" />
               Browse Opportunities
@@ -63,7 +59,7 @@ const HeroSection = () => {
               size="lg"
               variant="outline"
               onClick={scrollToChat}
-              className="border-white/20 text-white hover:bg-white/10 hover:border-white/40 transition-all duration-300 text-lg px-8 py-6"
+              className="border-white/20 text-gray-600 hover:bg-white/10 hover:border-white/40 transition-all duration-300 text-lg px-8 py-6"
             >
               <Bot className="mr-2 h-5 w-5" />
               Talk to AI Agent

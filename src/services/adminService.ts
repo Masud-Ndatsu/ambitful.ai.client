@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { AIDraft } from "@/hooks/use-ai-drafts";
 import { apiService } from "./api";
 import {
   AdminNotification,
@@ -125,22 +126,26 @@ export class AdminService {
     return response;
   }
 
-  async getUserActivity(userId: string): Promise<Array<{
-    id: string;
-    type: string;
-    action: string;
-    details: string;
-    timestamp: string;
-    date: string;
-  }>> {
-    const response = await apiService.get<Array<{
+  async getUserActivity(userId: string): Promise<
+    Array<{
       id: string;
       type: string;
       action: string;
       details: string;
       timestamp: string;
       date: string;
-    }>>(`/admin/users/${userId}/activity`);
+    }>
+  > {
+    const response = await apiService.get<
+      Array<{
+        id: string;
+        type: string;
+        action: string;
+        details: string;
+        timestamp: string;
+        date: string;
+      }>
+    >(`/admin/users/${userId}/activity`);
     return response;
   }
 
@@ -230,62 +235,274 @@ export class AdminService {
     return response;
   }
 
-  // Content Crawling
-  async triggerCrawl(
-    sourceId?: string
-  ): Promise<{ message: string; jobId: string }> {
-    const response = await apiService.post<{ message: string; jobId: string }>(
-      "/admin/crawl/trigger",
-      {
-        sourceId,
-      }
-    );
-    return response;
-  }
+  // Crawler Management - Updated to match backend routes
 
-  async getCrawlStatus(jobId: string): Promise<{
-    jobId: string;
-    status: "running" | "completed" | "failed";
-    progress: number;
-    resultCount: number;
-    errors?: string[];
+  // Crawl Source Management
+  async getCrawlSources(
+    filters: {
+      page?: number;
+      limit?: number;
+      status?: string;
+    } = {}
+  ): Promise<{
+    sources: CrawlingSource[];
+    total: number;
+    page: number;
+    totalPages: number;
   }> {
-    const response = await apiService.get<{
-      jobId: string;
-      status: "running" | "completed" | "failed";
-      progress: number;
-      resultCount: number;
-      errors?: string[];
-    }>(`/admin/crawl/status/${jobId}`);
-    return response;
+    const queryParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        // Convert status to uppercase for backend
+        const apiValue =
+          key === "status" ? value.toString().toUpperCase() : value.toString();
+        queryParams.append(key, apiValue);
+      }
+    });
+
+    const result = await apiService.get<any>(
+      `/crawler/sources?${queryParams.toString()}`
+    );
+
+    console.log({ result });
+
+    // Convert backend response to lowercase for frontend
+    return {
+      ...result,
+      sources: result?.map((source: any) => ({
+        ...source,
+        status: source.status.toLowerCase(),
+        frequency: source.frequency.toLowerCase(),
+      })),
+    };
   }
 
-  async addCrawlSource(
-    source: Omit<CrawlingSource, "id" | "lastCrawled">
+  async getActiveCrawlSources(): Promise<CrawlingSource[]> {
+    const result = await apiService.get<any[]>("/crawler/sources/active");
+    // Convert backend response to lowercase for frontend
+    return result?.map((source: any) => ({
+      ...source,
+      status: source.status.toLowerCase(),
+      frequency: source.frequency.toLowerCase(),
+    }));
+  }
+
+  async getCrawlSourcesDueForCrawl(): Promise<CrawlingSource[]> {
+    const result = await apiService.get<any[]>("/crawler/sources/due");
+    // Convert backend response to lowercase for frontend
+    return result?.map((source: any) => ({
+      ...source,
+      status: source.status.toLowerCase(),
+      frequency: source.frequency.toLowerCase(),
+    }));
+  }
+
+  async getCrawlSourceById(id: string): Promise<CrawlingSource> {
+    const result = await apiService.get<any>(`/crawler/sources/${id}`);
+    // Convert backend response to lowercase for frontend
+    return {
+      ...result,
+      status: result.status.toLowerCase(),
+      frequency: result.frequency.toLowerCase(),
+    };
+  }
+
+  async createCrawlSource(
+    source: Omit<
+      CrawlingSource,
+      "id" | "lastCrawl" | "lastSuccess" | "createdAt" | "updatedAt"
+    >
   ): Promise<CrawlingSource> {
-    const response = await apiService.post<CrawlingSource>(
-      "/admin/crawl/sources",
-      source
+    // Convert frontend lowercase to backend uppercase
+    const backendSource = {
+      ...source,
+      status: source.status.toUpperCase(),
+      frequency: source.frequency.toUpperCase(),
+    };
+
+    const result = await apiService.post<any>(
+      "/crawler/sources",
+      backendSource
     );
-    return response;
+
+    // Convert backend response back to lowercase for frontend
+    return {
+      ...result,
+      status: result.status.toLowerCase(),
+      frequency: result.frequency.toLowerCase(),
+    };
   }
 
   async updateCrawlSource(
-    sourceId: string,
+    id: string,
     source: Partial<CrawlingSource>
   ): Promise<CrawlingSource> {
-    const response = await apiService.put<CrawlingSource>(
-      `/admin/crawl/sources/${sourceId}`,
-      source
+    // Convert frontend lowercase to backend uppercase
+    const backendSource = {
+      ...source,
+      ...(source.status && { status: source.status.toUpperCase() }),
+      ...(source.frequency && { frequency: source.frequency.toUpperCase() }),
+    };
+
+    const result = await apiService.put<any>(
+      `/crawler/sources/${id}`,
+      backendSource
     );
-    return response;
+
+    // Convert backend response back to lowercase for frontend
+    return {
+      ...result,
+      status: result.status.toLowerCase(),
+      frequency: result.frequency.toLowerCase(),
+    };
   }
 
-  async deleteCrawlSource(sourceId: string): Promise<{ message: string }> {
-    const response = await apiService.delete<{ message: string }>(
-      `/admin/crawl/sources/${sourceId}`
+  async deleteCrawlSource(id: string): Promise<{ message: string }> {
+    return await apiService.delete<{ message: string }>(
+      `/crawler/sources/${id}`
     );
-    return response;
+  }
+
+  // Crawl Source Actions
+  async pauseCrawlSource(id: string): Promise<{ message: string }> {
+    return await apiService.post<{ message: string }>(
+      `/crawler/sources/${id}/pause`
+    );
+  }
+
+  async resumeCrawlSource(id: string): Promise<{ message: string }> {
+    return await apiService.post<{ message: string }>(
+      `/crawler/sources/${id}/resume`
+    );
+  }
+
+  async disableCrawlSource(id: string): Promise<{ message: string }> {
+    return await apiService.post<{ message: string }>(
+      `/crawler/sources/${id}/disable`
+    );
+  }
+
+  async startCrawl(id: string): Promise<{ message: string; jobId?: string }> {
+    return await apiService.post<{ message: string; jobId?: string }>(
+      `/crawler/sources/${id}/crawl`
+    );
+  }
+
+  // Monitoring & Logs
+  async getSourceHealth(id: string): Promise<{
+    sourceId: string;
+    status: string;
+    lastCrawl: string;
+    lastSuccess: boolean;
+    errorCount: number;
+    avgResponseTime: number;
+  }> {
+    return await apiService.get<{
+      sourceId: string;
+      status: string;
+      lastCrawl: string;
+      lastSuccess: boolean;
+      errorCount: number;
+      avgResponseTime: number;
+    }>(`/crawler/sources/${id}/health`);
+  }
+
+  async getCrawlLogs(
+    id: string,
+    filters: {
+      page?: number;
+      limit?: number;
+      status?: string;
+    } = {}
+  ): Promise<{
+    logs: Array<{
+      id: string;
+      status: string;
+      startTime: string;
+      endTime?: string;
+      itemsFound: number;
+      errorMessage?: string;
+    }>;
+    total: number;
+  }> {
+    const queryParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value.toString());
+      }
+    });
+
+    return await apiService.get<{
+      logs: Array<{
+        id: string;
+        status: string;
+        startTime: string;
+        endTime?: string;
+        itemsFound: number;
+        errorMessage?: string;
+      }>;
+      total: number;
+    }>(`/crawler/sources/${id}/logs?${queryParams.toString()}`);
+  }
+
+  async getRecentCrawlLogs(
+    filters: {
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<{
+    logs: Array<{
+      id: string;
+      sourceId: string;
+      sourceName: string;
+      status: string;
+      startTime: string;
+      endTime?: string;
+      itemsFound: number;
+      errorMessage?: string;
+    }>;
+    total: number;
+  }> {
+    const queryParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        queryParams.append(key, value.toString());
+      }
+    });
+
+    return await apiService.get<{
+      logs: Array<{
+        id: string;
+        sourceId: string;
+        sourceName: string;
+        status: string;
+        startTime: string;
+        endTime?: string;
+        itemsFound: number;
+        errorMessage?: string;
+      }>;
+      total: number;
+    }>(`/crawler/logs?${queryParams.toString()}`);
+  }
+
+  async getCrawlStats(): Promise<{
+    totalSources: number;
+    activeSources: number;
+    totalCrawls: number;
+    successfulCrawls: number;
+    failedCrawls: number;
+    avgCrawlTime: number;
+    lastCrawlTime?: string;
+  }> {
+    return await apiService.get<{
+      totalSources: number;
+      activeSources: number;
+      totalCrawls: number;
+      successfulCrawls: number;
+      failedCrawls: number;
+      avgCrawlTime: number;
+      lastCrawlTime?: string;
+    }>("/crawler/stats");
   }
 
   // Opportunity Management
@@ -383,14 +600,7 @@ export class AdminService {
       priority?: "high" | "medium" | "low";
     } = {}
   ): Promise<{
-    drafts: Array<{
-      id: string;
-      title: string;
-      source: string;
-      status: "pending" | "approved" | "rejected";
-      priority: "high" | "medium" | "low";
-      createdAt: string;
-    }>;
+    drafts: Array<AIDraft>;
     total: number;
     pending: number;
     page: number;
@@ -404,19 +614,64 @@ export class AdminService {
     });
 
     return await apiService.get<{
-      drafts: Array<{
-        id: string;
-        title: string;
-        source: string;
-        status: "pending" | "approved" | "rejected";
-        priority: "high" | "medium" | "low";
-        createdAt: string;
-      }>;
+      drafts: Array<AIDraft>;
       total: number;
       pending: number;
       page: number;
       totalPages: number;
     }>(`/admin/ai-drafts?${queryParams.toString()}`);
+  }
+
+  async getAIDraftById(id: string): Promise<any> {
+    return await apiService.get(`/admin/ai-drafts/${id}`);
+  }
+
+  async reviewAIDraft(
+    id: string,
+    action: "approve" | "reject" | "edit",
+    feedback?: string,
+    edits?: any
+  ): Promise<{ message: string; opportunity?: any }> {
+    return await apiService.post(`/admin/ai-drafts/${id}/review`, {
+      action,
+      feedback,
+      edits,
+    });
+  }
+
+  async deleteAIDraft(id: string): Promise<{ message: string }> {
+    return await apiService.delete(`/admin/ai-drafts/${id}`);
+  }
+
+  async regenerateAIDraft(
+    id: string
+  ): Promise<{ message: string; draft: any }> {
+    return await apiService.post(`/admin/ai-drafts/${id}/regenerate`);
+  }
+
+  async updateAIDraftPriority(
+    id: string,
+    priority: "high" | "medium" | "low"
+  ): Promise<{ message: string }> {
+    return await apiService.put(`/admin/ai-drafts/${id}/priority`, {
+      priority,
+    });
+  }
+
+  async bulkReviewAIDrafts(
+    draftIds: string[],
+    action: "approve" | "reject"
+  ): Promise<{ message: string; processed: number }> {
+    return await apiService.post(`/admin/ai-drafts/bulk-review`, {
+      draftIds,
+      action,
+    });
+  }
+
+  async bulkDeleteAIDrafts(
+    draftIds: string[]
+  ): Promise<{ message: string; deleted: number }> {
+    return await apiService.post(`/admin/ai-drafts/bulk-delete`, { draftIds });
   }
 }
 
