@@ -52,19 +52,15 @@ const Footer = () => {
         <Separator className="bg-background/20 mb-8" />
 
         {/* Contact Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 justify-center gap-6 mb-8">
           <div className="flex items-center justify-center md:justify-start space-x-3">
             <Mail className="h-5 w-5 text-primary" />
             <span className="text-muted">support@ambitful.ai</span>
           </div>
-          <div className="flex items-center justify-center space-x-3">
+          <div className="flex items-center justify-center md:justify-end space-x-3">
             <Phone className="h-5 w-5 text-primary" />
             <span className="text-muted">+1 (555) 123-4567</span>
           </div>
-          {/* <div className="flex items-center justify-center md:justify-end space-x-3">
-            <MapPin className="h-5 w-5 text-primary" />
-            <span className="text-muted">San Francisco, CA</span>
-          </div> */}
         </div>
 
         <Separator className="bg-background/20 mb-8" />
