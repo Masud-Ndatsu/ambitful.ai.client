@@ -53,6 +53,8 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { AdminUser } from "@/types/admin";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
+import { DataPagination } from "@/components/ui/DataPagination";
+import { formatDate } from "@/lib/utils";
 
 // Mock interaction history - this should come from the API in a real implementation
 const interactionHistory = [
@@ -97,6 +99,8 @@ export function UserManagement() {
   const {
     users,
     total,
+    page,
+    totalPages,
     loading,
     error,
     filters,
@@ -407,8 +411,15 @@ export function UserManagement() {
                         <Badge variant="secondary">Unverified</Badge>
                       )}
                     </TableCell>
-                    <TableCell>{user.signupDate || user.createdAt}</TableCell>
-                    <TableCell>{user.lastActive || user.lastLogin}</TableCell>
+                    <TableCell>
+                      {formatDate(user.signupDate || user.createdAt, { format: "short" })}
+                    </TableCell>
+                    <TableCell>
+                      {user.lastActive || user.lastLogin 
+                        ? formatDate(user.lastActive || user.lastLogin, { relative: true })
+                        : "Never"
+                      }
+                    </TableCell>
                     <TableCell className="text-right">
                       {user.chatbotInteractions || 0}
                     </TableCell>
@@ -457,6 +468,19 @@ export function UserManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {users.length > 0 && (
+        <DataPagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={(newPage) => setFilters({ page: newPage })}
+          showPageInfo={true}
+          totalItems={total}
+          itemsPerPage={10}
+          className="mt-6"
+        />
+      )}
     </div>
   );
 }

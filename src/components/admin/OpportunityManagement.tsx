@@ -56,88 +56,32 @@ import { Textarea } from "@/components/ui/textarea";
 import TextEditor from "../RichTextEditor";
 import { useAdminOpportunities } from "@/hooks/use-admin-opportunities";
 import { useToast } from "@/hooks/use-toast";
-import {
-  DEFAULT_TYPES,
-  TYPE_LABELS,
-  DEFAULT_CATEGORIES,
-  CATEGORY_LABELS,
-} from "@/data";
+import { UI_OPPORTUNITY_TYPES, UI_CATEGORIES } from "@/enums";
 import { formatDate } from "@/lib/utils";
+import { LoadingButton } from "@/components/ui/LoadingButton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useDebounce } from "@/hooks/use-debounce";
-
-const opportunities = [
-  {
-    id: 1,
-    title: "Google Summer of Code 2024",
-    category: "Technology",
-    status: "Published",
-    dateAdded: "2024-01-15",
-    author: "Admin User",
-    views: 1200,
-    applications: 45,
-  },
-  {
-    id: 2,
-    title: "UN Youth Climate Summit",
-    category: "Environment",
-    status: "Draft",
-    dateAdded: "2024-01-20",
-    author: "Content Manager",
-    views: 0,
-    applications: 0,
-  },
-  {
-    id: 3,
-    title: "Microsoft LEAP Program",
-    category: "Technology",
-    status: "Published",
-    dateAdded: "2024-01-18",
-    author: "Admin User",
-    views: 890,
-    applications: 32,
-  },
-  {
-    id: 4,
-    title: "World Bank Youth Summit",
-    category: "Finance",
-    status: "Archived",
-    dateAdded: "2024-01-10",
-    author: "Editor",
-    views: 2100,
-    applications: 78,
-  },
-  {
-    id: 5,
-    title: "Mastercard Foundation Scholarship",
-    category: "Education",
-    status: "Published",
-    dateAdded: "2024-01-22",
-    author: "Admin User",
-    views: 1500,
-    applications: 120,
-  },
-];
+import { DataPagination } from "@/components/ui/DataPagination";
 
 export function OpportunityManagement() {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchInput, setSearchInput] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [viewOpportunity, setViewOpportunity] = useState<any>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [loadingOpportunity, setLoadingOpportunity] = useState(false);
   const debouncedSearch = useDebounce(searchInput, 300);
   // Form state based on createOpportunitySchema
   const [title, setTitle] = useState("");
-  const [type, setType] = useState<(typeof DEFAULT_TYPES)[number]>(
-    DEFAULT_TYPES[0] as (typeof DEFAULT_TYPES)[number]
-  );
+  const [type, setType] = useState("");
   const [description, setDescription] = useState("");
   const [fullDescription, setFullDescription] = useState("");
   const [deadline, setDeadline] = useState("");
   const [location, setLocation] = useState("");
   const [link, setLink] = useState("");
-  const [category, setCategory] = useState<
-    (typeof DEFAULT_CATEGORIES)[number] | ""
-  >("");
+  const [category, setCategory] = useState("");
   const [status, setStatus] = useState<"published" | "draft">("draft");
 
   // Admin hooks
@@ -152,9 +96,13 @@ export function OpportunityManagement() {
     refetch,
     stats,
     total,
+    page,
+    totalPages,
     setSearch,
     setStatus: setApiStatus,
     setCategory: setApiCategory,
+    setPage,
+    getOpportunityById,
   } = useAdminOpportunities();
   const { toast } = useToast();
 
@@ -173,9 +121,8 @@ export function OpportunityManagement() {
     setApiCategory(categoryFilter === "all" ? undefined : categoryFilter);
   }, [categoryFilter, setApiCategory]);
 
-  // Use real opportunities data if available, fallback to mock data
-  const displayOpportunities =
-    adminOpportunities.length > 0 ? adminOpportunities : opportunities;
+  // Use only real opportunities data
+  const displayOpportunities = adminOpportunities;
 
   const handleSelectItem = (id: string, checked: boolean) => {
     if (checked) {
@@ -215,7 +162,7 @@ export function OpportunityManagement() {
   // Reset form state
   const resetForm = () => {
     setTitle("");
-    setType(DEFAULT_TYPES[0] as (typeof DEFAULT_TYPES)[number]);
+    setType("");
     setDescription("");
     setFullDescription("");
     setDeadline("");
@@ -232,6 +179,14 @@ export function OpportunityManagement() {
         toast({
           title: "Validation Error",
           description: "Title is required",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!type.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "Type is required",
           variant: "destructive",
         });
         return;
@@ -299,6 +254,7 @@ export function OpportunityManagement() {
         variant: "default",
       });
       resetForm();
+      setIsDialogOpen(false);
     } catch (error) {
       console.error("Error creating opportunity:", error);
       toast({
@@ -322,27 +278,32 @@ export function OpportunityManagement() {
     }
   };
 
-  // Use API data if available, otherwise filter mock data locally
-  const filteredOpportunities =
-    adminOpportunities.length > 0
-      ? adminOpportunities
-      : displayOpportunities.filter((opp) => {
-          const matchesSearch =
-            searchInput === "" ||
-            (opp.title || "").toLowerCase().includes(searchInput.toLowerCase());
-          const matchesStatus =
-            statusFilter === "all" ||
-            (opp.status || "").toLowerCase() === statusFilter.toLowerCase();
-          const matchesCategory =
-            categoryFilter === "all" || opp.category === categoryFilter;
-          return matchesSearch && matchesStatus && matchesCategory;
-        });
+  // Use only real API data
+  const filteredOpportunities = displayOpportunities;
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       setSelectedItems(filteredOpportunities.map((opp) => String(opp.id)));
     } else {
       setSelectedItems([]);
+    }
+  };
+
+  const handleViewOpportunity = async (opportunity: any) => {
+    try {
+      setLoadingOpportunity(true);
+      setIsViewDialogOpen(true);
+      const fullOpportunity = await getOpportunityById(opportunity.id);
+      setViewOpportunity(fullOpportunity);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load opportunity details",
+        variant: "destructive",
+      });
+      setIsViewDialogOpen(false);
+    } finally {
+      setLoadingOpportunity(false);
     }
   };
 
@@ -379,7 +340,7 @@ export function OpportunityManagement() {
             Manage and track all opportunities
           </p>
         </div>
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="h-4 w-4 mr-2" />
@@ -406,21 +367,17 @@ export function OpportunityManagement() {
                 </div>
                 <div>
                   <Label htmlFor="type">Type</Label>
-                  <Select
-                    value={type}
-                    onValueChange={(value: (typeof DEFAULT_TYPES)[number]) =>
-                      setType(value)
-                    }
-                  >
+                  <Select value={type} onValueChange={setType}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {DEFAULT_TYPES.map((typeOption) => (
-                        <SelectItem key={typeOption} value={typeOption}>
-                          {TYPE_LABELS[
-                            typeOption as keyof typeof TYPE_LABELS
-                          ] || typeOption}
+                      {UI_OPPORTUNITY_TYPES.map((typeOption) => (
+                        <SelectItem
+                          key={typeOption.value}
+                          value={typeOption.value}
+                        >
+                          {typeOption.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -429,21 +386,17 @@ export function OpportunityManagement() {
               </div>
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Select
-                  value={category}
-                  onValueChange={(value: (typeof DEFAULT_CATEGORIES)[number]) =>
-                    setCategory(value)
-                  }
-                >
+                <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {DEFAULT_CATEGORIES.map((categoryOption) => (
-                      <SelectItem key={categoryOption} value={categoryOption}>
-                        {CATEGORY_LABELS[
-                          categoryOption as keyof typeof CATEGORY_LABELS
-                        ] || categoryOption}
+                    {UI_CATEGORIES.map((categoryOption) => (
+                      <SelectItem
+                        key={categoryOption.value}
+                        value={categoryOption.value}
+                      >
+                        {categoryOption.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -488,25 +441,135 @@ export function OpportunityManagement() {
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button
+                <LoadingButton
                   variant="outline"
                   onClick={() => {
                     setStatus("draft");
                     handleCreateOpportunity();
                   }}
+                  loading={creating}
+                  loadingText="Creating..."
                 >
                   Save as Draft
-                </Button>
-                <Button
+                </LoadingButton>
+                <LoadingButton
                   onClick={() => {
                     setStatus("published");
                     handleCreateOpportunity();
                   }}
+                  loading={creating}
+                  loadingText="Creating..."
                 >
                   Publish
-                </Button>
+                </LoadingButton>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Opportunity Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>View Opportunity</DialogTitle>
+              <DialogDescription>
+                Complete opportunity details and information
+              </DialogDescription>
+            </DialogHeader>
+            {loadingOpportunity ? (
+              <div className="flex justify-center py-8">
+                <RefreshCw className="h-6 w-6 animate-spin" />
+              </div>
+            ) : viewOpportunity ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Title</Label>
+                    <p className="text-lg font-medium">{viewOpportunity.title}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Status</Label>
+                    <Badge variant={getStatusColor(viewOpportunity.status)} className="mt-1">
+                      {viewOpportunity.status}
+                    </Badge>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Type</Label>
+                    <p>{viewOpportunity.type}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Category</Label>
+                    <p>{viewOpportunity.category}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Location</Label>
+                    <p>{viewOpportunity.location}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Deadline</Label>
+                    <p>{formatDate(viewOpportunity.deadline, { format: "medium" })}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Created</Label>
+                    <p>{formatDate(viewOpportunity.createdAt || viewOpportunity.dateAdded, { format: "medium" })}</p>
+                  </div>
+                </div>
+
+                {viewOpportunity.amount && (
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Amount</Label>
+                    <p>{viewOpportunity.amount}</p>
+                  </div>
+                )}
+
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Description</Label>
+                  <p className="text-sm leading-relaxed">{viewOpportunity.description}</p>
+                </div>
+
+                {viewOpportunity.detail?.fullDescription && (
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Full Description</Label>
+                    <div className="text-sm leading-relaxed p-4 bg-muted rounded-md">
+                      {viewOpportunity.detail.fullDescription}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Application Link</Label>
+                  <a 
+                    href={viewOpportunity.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline break-all"
+                  >
+                    {viewOpportunity.link}
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+                  <div className="text-center">
+                    <Label className="text-sm font-medium text-muted-foreground">Views</Label>
+                    <p className="text-2xl font-bold">{viewOpportunity.detail?.views || viewOpportunity.views || 0}</p>
+                  </div>
+                  <div className="text-center">
+                    <Label className="text-sm font-medium text-muted-foreground">Applications</Label>
+                    <p className="text-2xl font-bold">{viewOpportunity.detail?.applications || viewOpportunity.applications || 0}</p>
+                  </div>
+                  <div className="text-center">
+                    <Label className="text-sm font-medium text-muted-foreground">Saves</Label>
+                    <p className="text-2xl font-bold">{viewOpportunity.detail?.saves || viewOpportunity.saves || 0}</p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </DialogContent>
         </Dialog>
       </div>
@@ -554,6 +617,7 @@ export function OpportunityManagement() {
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="published">Published</SelectItem>
                   <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="reviewed">Reviewed</SelectItem>
                   <SelectItem value="archived">Archived</SelectItem>
                 </SelectContent>
               </Select>
@@ -699,61 +763,94 @@ export function OpportunityManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredOpportunities.map((opportunity: any) => (
-                  <TableRow key={opportunity.id}>
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedItems.includes(String(opportunity.id))}
-                        onCheckedChange={(checked) =>
-                          handleSelectItem(String(opportunity.id), !!checked)
-                        }
-                      />
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {opportunity.title.substring(0, 20)}
-                    </TableCell>
-                    <TableCell>{opportunity.category}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusColor(opportunity.status)}>
-                        {opportunity.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {formatDate(
-                        opportunity?.createdAt || opportunity?.dateAdded,
-                        { format: "short" }
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {opportunity.views}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {opportunity.applications}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                {filteredOpportunities.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      <div className="text-muted-foreground">
+                        <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+                        <p>No opportunities found</p>
+                        <p className="text-sm">
+                          Try adjusting your filters or create a new opportunity
+                        </p>
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  filteredOpportunities.map((opportunity: any) => (
+                    <TableRow key={opportunity.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedItems.includes(
+                            String(opportunity.id)
+                          )}
+                          onCheckedChange={(checked) =>
+                            handleSelectItem(String(opportunity.id), !!checked)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {opportunity.title.substring(0, 20)}
+                      </TableCell>
+                      <TableCell>{opportunity.category}</TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusColor(opportunity.status)}>
+                          {opportunity.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {formatDate(
+                          opportunity?.createdAt || opportunity?.dateAdded,
+                          { format: "short" }
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {opportunity.views || 0}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {opportunity.applications || 0}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleViewOpportunity(opportunity)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {adminOpportunities.length > 0 && (
+        <DataPagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          showPageInfo={true}
+          totalItems={total}
+          itemsPerPage={10}
+          className="mt-6"
+        />
+      )}
     </div>
   );
 }
