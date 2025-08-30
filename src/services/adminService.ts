@@ -521,6 +521,12 @@ export class AdminService {
     );
   }
 
+  async getOpportunityById(id: string): Promise<AdminOpportunity> {
+    return await apiService.get<AdminOpportunity>(
+      `/admin/opportunities/${id}`
+    );
+  }
+
   async createOpportunity(
     data: CreateOpportunityData
   ): Promise<AdminOpportunity> {
@@ -604,6 +610,7 @@ export class AdminService {
     total: number;
     pending: number;
     page: number;
+    limit: number;
     totalPages: number;
   }> {
     const queryParams = new URLSearchParams();
@@ -618,6 +625,7 @@ export class AdminService {
       total: number;
       pending: number;
       page: number;
+      limit: number;
       totalPages: number;
     }>(`/admin/ai-drafts?${queryParams.toString()}`);
   }

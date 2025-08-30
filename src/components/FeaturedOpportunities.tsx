@@ -294,8 +294,7 @@ const FeaturedOpportunities = () => {
                     <Button
                       className="w-full border text-primary hover:text-white bg-gradient-primary hover:shadow-glow transition-all duration-300"
                       onClick={() =>
-                        // window.open(opportunity.link || "#", "_blank")
-                        navigate(`/opportunities?opportunity=${opportunity.id}`)
+                        navigate(`/opportunities/${opportunity.id}`)
                       }
                     >
                       <ExternalLink className="mr-2 h-4 w-4" />
@@ -308,7 +307,14 @@ const FeaturedOpportunities = () => {
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <Button variant="outline" size="lg" className="px-8">
+          <Button
+            onClick={() => {
+              navigate("/opportunities");
+            }}
+            variant="outline"
+            size="lg"
+            className="px-8"
+          >
             View All Opportunities
           </Button>
         </div>

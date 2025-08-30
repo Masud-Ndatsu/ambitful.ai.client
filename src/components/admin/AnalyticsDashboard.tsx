@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import { Download, TrendingUp, Users, MessageSquare, MousePointer, Eye, Clock, Globe } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
 const userEngagementData = [
   { month: "Jan", sessions: 2400, bounceRate: 45, avgDuration: 180 },
@@ -305,9 +306,9 @@ export function AnalyticsDashboard() {
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={chatbotData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" tickFormatter={(value) => new Date(value).getDate().toString()} />
+                    <XAxis dataKey="date" tickFormatter={(value) => formatDate(value, { format: "short" }).split(',')[0]} />
                     <YAxis />
-                    <Tooltip labelFormatter={(label) => new Date(label).toLocaleDateString()} />
+                    <Tooltip labelFormatter={(label) => formatDate(label, { format: "medium" })} />
                     <Area type="monotone" dataKey="activeUsers" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.3} />
                     <Area type="monotone" dataKey="queries" stroke="hsl(var(--secondary))" fill="hsl(var(--secondary))" fillOpacity={0.3} />
                   </AreaChart>

@@ -1,19 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { OpportunitySearch } from "@/components/OpportunitySearch";
 import { OpportunityFilters } from "@/components/OpportunityFilters";
 import { OpportunityCard } from "@/components/OpportunityCard";
-import { OpportunityDetailModal } from "@/components/OpportunityDetailModal";
 import { Button } from "@/components/ui/button";
 import { Grid, List } from "lucide-react";
+import { DataPagination } from "@/components/ui/DataPagination";
 import { useOpportunities } from "@/hooks/use-opportunities";
 import type { Opportunity } from "@/types/opportunity";
 
 const Opportunities = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Use the opportunities hook
@@ -35,46 +36,24 @@ const Opportunities = () => {
     getOpportunityById,
   } = useOpportunities();
 
-  console.log({ filters, availableFilters });
+  console.log({ filters, total, totalPages });
 
-  // Get the selected opportunity from URL parameter
-  const selectedOpportunityId = searchParams.get("opportunity");
-  const [selectedOpportunity, setSelectedOpportunity] =
-    useState<Opportunity | null>(null);
-
-  // Load selected opportunity when ID changes
+  // Sync URL with hook filters on mount
   useEffect(() => {
-    if (selectedOpportunityId) {
-      getOpportunityById(selectedOpportunityId)
-        .then(setSelectedOpportunity)
-        .catch(() => setSelectedOpportunity(null));
-    } else {
-      setSelectedOpportunity(null);
-    }
-  }, [selectedOpportunityId, getOpportunityById]);
+    const search = searchParams.get("search");
+    const category = searchParams.get("category");
+    const location = searchParams.get("location");
+    const type = searchParams.get("type");
+    const sortBy = searchParams.get("sortBy");
+    const page = searchParams.get("page");
 
-  // Function to handle opening opportunity modal
-  const handleViewDetails = (opportunityId: string) => {
-    setSearchParams((prev) => {
-      const newParams = new URLSearchParams(prev);
-      newParams.set("opportunity", opportunityId);
-      return newParams;
-    });
-  };
-
-  // Function to handle closing opportunity modal
-  const handleCloseModal = () => {
-    setSearchParams((prev) => {
-      const newParams = new URLSearchParams(prev);
-      newParams.delete("opportunity");
-      return newParams;
-    });
-  };
-
-  // Handle search input change
-  const handleSearchChange = (query: string) => {
-    setSearch(query);
-  };
+    if (search && search !== filters.search) setSearch(search);
+    if (category && category !== filters.category) setCategory(category);
+    if (location && location !== filters.location) setLocation(location);
+    if (type && type !== filters.type) setType(type);
+    if (sortBy && sortBy !== filters.sortBy) setSortBy(sortBy as any);
+    if (page && parseInt(page) !== filters.page) setPage(parseInt(page));
+  }, [searchParams]);
 
   // Handle filter changes
   const handleFiltersChange = (
@@ -82,21 +61,89 @@ const Opportunities = () => {
   ) => {
     // Handle each filter type, including clearing (undefined values)
     if (newFilters.search !== undefined) {
-      setSearch(newFilters.search || "");
+      const updatedFilters = {
+        ...filters,
+        search: newFilters.search || undefined,
+        page: 1,
+      };
+      updateURL(updatedFilters);
     }
     if (newFilters.category !== undefined) {
-      setCategory(newFilters.category || "");
+      const updatedFilters = {
+        ...filters,
+        category: newFilters.category || undefined,
+        page: 1,
+      };
+      updateURL(updatedFilters);
     }
     if (newFilters.location !== undefined) {
-      setLocation(newFilters.location || "");
+      const updatedFilters = {
+        ...filters,
+        location: newFilters.location || undefined,
+        page: 1,
+      };
+      updateURL(updatedFilters);
     }
     if (newFilters.type !== undefined) {
-      setType(newFilters.type || "");
+      const updatedFilters = {
+        ...filters,
+        type: newFilters.type || undefined,
+        page: 1,
+      };
+      updateURL(updatedFilters);
     }
     if (newFilters.sortBy !== undefined) {
-      setSortBy(newFilters.sortBy);
+      const updatedFilters = { ...filters, sortBy: newFilters.sortBy, page: 1 };
+      updateURL(updatedFilters);
     }
   };
+
+  // Handle page changes
+  const handlePageChange = (page: number) => {
+    const updatedFilters = { ...filters, page };
+    updateURL(updatedFilters);
+  };
+
+  // Function to handle navigating to opportunity details page
+  const handleViewDetails = (opportunityId: string) => {
+    navigate(`/opportunities/${opportunityId}`);
+  };
+
+  // Update URL when filters change
+  const updateURL = (newFilters: any) => {
+    const newSearchParams = new URLSearchParams();
+
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        newSearchParams.set(key, String(value));
+      }
+    });
+
+    setSearchParams(newSearchParams);
+  };
+
+  // Handle search input change
+  const handleSearchChange = (query: string) => {
+    handleFiltersChange({ search: query || undefined, page: 1 });
+  };
+
+  // Sync URL with hook filters on mount
+  useEffect(() => {
+    const search = searchParams.get("search");
+    const category = searchParams.get("category");
+    const location = searchParams.get("location");
+    const type = searchParams.get("type");
+    const sortBy = searchParams.get("sortBy");
+    const page = searchParams.get("page");
+    const limit = searchParams.get("limit");
+
+    if (search && search !== filters.search) setSearch(search);
+    if (category && category !== filters.category) setCategory(category);
+    if (location && location !== filters.location) setLocation(location);
+    if (type && type !== filters.type) setType(type);
+    if (sortBy && sortBy !== filters.sortBy) setSortBy(sortBy as any);
+    if (page && parseInt(page) !== filters.page) setPage(parseInt(page));
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -214,53 +261,15 @@ const Opportunities = () => {
                 )}
 
                 {/* Pagination */}
-                {!loading && totalPages > 1 && (
-                  <div className="flex justify-center mt-12">
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setPage(Math.max(page - 1, 1))}
-                        disabled={page === 1}
-                      >
-                        Previous
-                      </Button>
-
-                      {Array.from(
-                        { length: Math.min(totalPages, 5) },
-                        (_, i) => {
-                          let pageNum;
-                          if (totalPages <= 5) {
-                            pageNum = i + 1;
-                          } else if (page <= 3) {
-                            pageNum = i + 1;
-                          } else if (page >= totalPages - 2) {
-                            pageNum = totalPages - 4 + i;
-                          } else {
-                            pageNum = page - 2 + i;
-                          }
-
-                          return (
-                            <Button
-                              key={pageNum}
-                              variant={page === pageNum ? "default" : "outline"}
-                              onClick={() => setPage(pageNum)}
-                            >
-                              {pageNum}
-                            </Button>
-                          );
-                        }
-                      )}
-
-                      <Button
-                        variant="outline"
-                        onClick={() => setPage(Math.min(page + 1, totalPages))}
-                        disabled={page === totalPages}
-                      >
-                        Next
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                <DataPagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  showPageInfo={true}
+                  totalItems={total}
+                  itemsPerPage={10}
+                  className="mt-12"
+                />
               </div>
             </div>
           </div>
@@ -268,14 +277,6 @@ const Opportunities = () => {
       </div>
 
       <Footer />
-
-      {/* Opportunity Detail Modal */}
-      {selectedOpportunity && (
-        <OpportunityDetailModal
-          opportunity={selectedOpportunity}
-          onClose={handleCloseModal}
-        />
-      )}
     </div>
   );
 };

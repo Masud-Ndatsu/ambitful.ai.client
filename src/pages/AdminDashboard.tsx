@@ -109,10 +109,9 @@ function AdminSidebar({
 
 function AdminHeader({ user, onLogout }: { user: any; onLogout: () => void }) {
   return (
-    <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between px-6">
+    <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between px-6 sticky bg-white top-0 z-10">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
-        {/* <h1 className="text-xl font-semibold">Admin Dashboard</h1> */}
         <Link to="/">
           <Button variant="outline" size="sm">
             <Home className="h-4 w-4 mr-2" />
@@ -198,7 +197,7 @@ export default function AdminDashboard() {
         navigate("/admin/dashboard", { replace: true });
       }
     } else if (!tab) {
-      // If no tab in URL, set dashboard as active and redirect to it  
+      // If no tab in URL, set dashboard as active and redirect to it
       setActiveTab("dashboard");
       navigate("/admin/dashboard", { replace: true });
     }

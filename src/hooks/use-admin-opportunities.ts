@@ -60,6 +60,14 @@ export function useAdminOpportunities() {
     []
   );
 
+  // Get single opportunity by ID
+  const getOpportunityById = useCallback(
+    async (id: string): Promise<AdminOpportunity> => {
+      return await adminService.getOpportunityById(id);
+    },
+    []
+  );
+
   // Admin methods
   const createOpportunity = useCallback(
     async (data: CreateOpportunityData) => {
@@ -182,6 +190,7 @@ export function useAdminOpportunities() {
     draftOpportunity,
     bulkAction,
     getOpportunityAnalytics,
+    getOpportunityById,
     refetch: refetchOpportunities,
 
     // Filter methods

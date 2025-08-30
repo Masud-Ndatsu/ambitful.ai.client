@@ -57,6 +57,7 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useCrawler } from "@/hooks/use-crawler";
+import { formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 
 const adminUsers = [
@@ -609,7 +610,7 @@ export function SystemSettings() {
                         </TableCell>
                         <TableCell>
                           {source.lastCrawl
-                            ? new Date(source.lastCrawl).toLocaleDateString()
+                            ? formatDate(source.lastCrawl, { relative: true })
                             : "Never"}
                         </TableCell>
                         <TableCell>
