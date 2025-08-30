@@ -68,7 +68,7 @@ All colors MUST be HSL.
     --shadow-glow: 0 8px 32px -8px hsl(18 85% 58% / 0.3);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-    --radius: 0.5rem;
+    --radius: 0px;
 
     --sidebar-background: 0 0% 98%;
 

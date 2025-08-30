@@ -2,17 +2,10 @@
 import { useState, useCallback } from "react";
 import { useApi, useMutation } from "./use-api";
 import { adminService } from "@/services/adminService";
+import { OpportunityTypeType } from "@/enums";
 
 type DraftStatus = "pending" | "approved" | "rejected" | "draft";
 type DraftPriority = "high" | "medium" | "low";
-type OpportunityType =
-  | "scholarship"
-  | "grant"
-  | "job"
-  | "internship"
-  | "competition"
-  | "training"
-  | "fellowship";
 
 export interface AIDraft {
   id: string;
@@ -24,7 +17,7 @@ export interface AIDraft {
 
   // Extracted opportunity fields
   extractedTitle: string;
-  extractedType: OpportunityType;
+  extractedType: OpportunityTypeType;
   extractedDescription: string;
   extractedDeadline?: Date | null;
   extractedLocation?: string | null;
@@ -67,6 +60,7 @@ export interface AIDraftsApiResponse {
   total: number;
   pending: number;
   page: number;
+  limit: number;
   totalPages: number;
 }
 
@@ -313,6 +307,7 @@ export function useAIDrafts(initialFilters: DraftFilters = {}) {
     drafts: draftsData?.drafts || [],
     total: draftsData?.total || 0,
     page: draftsData?.page || 1,
+    limit: draftsData?.limit || 10,
     totalPages: draftsData?.totalPages || 1,
     stats: stats || null,
     filters,

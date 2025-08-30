@@ -1,8 +1,8 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 /**
@@ -37,7 +37,8 @@ export function formatDate(
     // Format based on the format option
     const formatOptions: Intl.DateTimeFormatOptions = {
       year: "numeric",
-      month: format === "short" ? "short" : format === "long" ? "long" : "short",
+      month:
+        format === "short" ? "short" : format === "long" ? "long" : "short",
       day: "numeric",
     };
 
@@ -93,7 +94,8 @@ export function formatDeadline(deadline: string | Date): {
   urgency: "expired" | "urgent" | "soon" | "normal";
   daysLeft: number;
 } {
-  const deadlineDate = typeof deadline === "string" ? new Date(deadline) : deadline;
+  const deadlineDate =
+    typeof deadline === "string" ? new Date(deadline) : deadline;
   const now = new Date();
   const diff = deadlineDate.getTime() - now.getTime();
   const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
@@ -109,13 +111,16 @@ export function formatDeadline(deadline: string | Date): {
     urgency = "normal";
   }
 
-  const formatted = daysLeft < 0 
-    ? `Expired ${Math.abs(daysLeft)} day${Math.abs(daysLeft) !== 1 ? "s" : ""} ago`
-    : daysLeft === 0
-    ? "Due today"
-    : daysLeft === 1
-    ? "Due tomorrow"
-    : `${daysLeft} days left`;
+  const formatted =
+    daysLeft < 0
+      ? `Expired ${Math.abs(daysLeft)} day${
+          Math.abs(daysLeft) !== 1 ? "s" : ""
+        } ago`
+      : daysLeft === 0
+      ? "Due today"
+      : daysLeft === 1
+      ? "Due tomorrow"
+      : `${daysLeft} days left`;
 
   return {
     formatted,
