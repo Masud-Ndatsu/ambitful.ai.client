@@ -1,9 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Menu, X, User, LogOut, Settings } from "lucide-react";
+import {
+  MessageCircle,
+  Menu,
+  X,
+  User,
+  LogOut,
+  Settings,
+  ChevronDown,
+  Grid3x3,
+} from "lucide-react";
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/hooks/use-auth";
+import { UI_CATEGORIES } from "@/enums";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -17,7 +27,9 @@ import {
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   const scrollToChat = () => {
     const chatWidget = document.getElementById("chat-widget");
@@ -62,12 +74,58 @@ const Navbar = () => {
               >
                 Opportunities
               </NavLink>
-              <a
-                href="#categories"
-                className="text-foreground hover:text-primary transition-smooth"
+              <DropdownMenu
+                open={isCategoriesOpen}
+                onOpenChange={setIsCategoriesOpen}
               >
-                Categories
-              </a>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="text-foreground hover:text-primary transition-smooth"
+                  >
+                    Categories
+                    <ChevronDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[600px] max-h-[400px] overflow-y-auto"
+                >
+                  <DropdownMenuLabel className="flex items-center gap-2">
+                    <Grid3x3 className="h-4 w-4" />
+                    Browse by Category
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <div className="grid grid-cols-2 gap-1 p-2">
+                    {UI_CATEGORIES.map((category) => (
+                      <DropdownMenuItem
+                        key={category.value}
+                        className="cursor-pointer hover:bg-accent"
+                        onClick={() => {
+                          navigate(
+                            `/opportunities?category=${encodeURIComponent(
+                              category.value
+                            )}`
+                          );
+                          setIsCategoriesOpen(false);
+                        }}
+                      >
+                        {category.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="cursor-pointer font-medium"
+                    onClick={() => {
+                      navigate("/opportunities");
+                      setIsCategoriesOpen(false);
+                    }}
+                  >
+                    View All Opportunities
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <NavLink
                 to="/#about"
                 className="text-foreground hover:text-primary transition-smooth"
